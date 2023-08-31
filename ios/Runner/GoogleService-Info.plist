@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>8175006174-1qc9qd9t5uq7utgnc8c41c5m8i4smd3p.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.8175006174-1qc9qd9t5uq7utgnc8c41c5m8i4smd3p</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAg4IEV_CsAfoEilUX5TyWJcvgSTscRK24</string>
+	<key>GCM_SENDER_ID</key>
+	<string>8175006174</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.nexuslink.linkup</string>
+	<key>PROJECT_ID</key>
+	<string>nexus-v03</string>
+	<key>STORAGE_BUCKET</key>
+	<string>nexus-v03.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:8175006174:ios:417840833d0b6ffeb1ed4f</string>
+</dict>
+</plist>
