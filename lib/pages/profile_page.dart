@@ -3,7 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:nexus/components/button.dart';
 import 'package:nexus/components/text_box.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -166,6 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text("P R O F I L E  P A G E"),
+        elevation: 0,
       ),
       body: FutureBuilder<QuerySnapshot>(
           future: docRef,
@@ -214,8 +214,31 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () => editField("bio"),
                 ),
                 const SizedBox(height: 50),
-                MyButton(
-                    onTap: showDeleteDialog, text: "Delete your account data"),
+                SizedBox(
+                  width: double
+                      .infinity, // Make sure the container is as wide as its parent
+                  child: GestureDetector(
+                    onTap: showDeleteDialog,
+                    child: SizedBox(
+                      width: 60, // Adjust the width as needed
+                      height: 50,
+                      child: Container(
+                        padding: EdgeInsets.all(
+                            10), // Reduce padding to fit the text
+
+                        child: Center(
+                          child: Text(
+                            "Delete your account data",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
 
                 //Padding(
                 //  padding: const EdgeInsets.only(left: 25.0),

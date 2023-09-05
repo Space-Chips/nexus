@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
               color: Colors.grey[900],
             ),
           ),
-          nextScreen: AdPage(),
+          nextScreen: const AdPage(),
         ),
         debugShowCheckedModeBanner: false,
         theme: theme,

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nexus/components/wall_post.dart';
+import 'package:nexus/helper/helper_methods.dart';
 
 class UserPostsPage extends StatefulWidget {
+  const UserPostsPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _UserPostsPageState createState() => _UserPostsPageState();
 }
 
@@ -13,8 +18,10 @@ class _UserPostsPageState extends State<UserPostsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Posts'),
+        title: const Text('U S E R  P O S T S'),
+        elevation: 0,
       ),
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
         children: [
           // Search Bar
@@ -26,7 +33,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                   userEmailFilter = value; // Update filter when text changes
                 });
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Filter by Email',
                 border: OutlineInputBorder(),
               ),
@@ -37,41 +44,93 @@ class _UserPostsPageState extends State<UserPostsPage> {
               stream: FirebaseFirestore.instance
                   .collection("Posts")
                   .where('UserEmail',
-                      isEqualTo: userEmailFilter) // Filter by email
+                      isGreaterThanOrEqualTo:
+                          userEmailFilter) // Filter by email
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const Center(
+                    // Center the CircularProgressIndicator
+                    child: CircularProgressIndicator(),
+                  );
                 }
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 }
 
                 // Check if data is not null and if docs is not empty
-                if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                  // Extract the list of posts
-                  final List<DocumentSnapshot> posts = snapshot.data!.docs;
-
+                if (snapshot.hasData) {
                   return ListView.builder(
-                    itemCount: posts.length,
+                    itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
-                      final post = posts[index].data() as Map<String, dynamic>;
-
-                      // Display the post details
-                      return ListTile(
-                        title: Text(post['Message']),
-                        subtitle: Text('Posted by: ${post['User']}'),
+                      // get messages
+                      final post = snapshot.data!.docs[index];
+                      return WallPost(
+                        message: post['Message'],
+                        user: post['User'],
+                        userEmail: post['UserEmail'],
+                        isAdminPost: post['isAdminPost'],
+                        postId: post.id,
+                        likes: List<String>.from(post['Likes'] ?? []),
+                        time: formatDate(post['TimeStamp']),
                       );
                     },
                   );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error:${snapshot.error}'),
+                  );
                 } else {
-                  return Text('No posts found.');
+                  return const Center(
+                    child: Text('No posts found.'),
+                  );
                 }
               },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class CommentSection extends StatelessWidget {
+  final String postId;
+
+  const CommentSection({super.key, required this.postId});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection("Posts")
+          .doc(postId)
+          .collection("Comments")
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        if (snapshot.hasData) {
+          final comments = snapshot.data!.docs;
+
+          return Column(
+            children: comments.map((comment) {
+              final commentData = comment.data();
+              return ListTile(
+                title: Text(commentData['CommentText']),
+                subtitle: Text('Commented by: ${commentData['CommentedBy']}'),
+              );
+            }).toList(),
+          );
+        } else {
+          return const Text('No comments yet.');
+        }
+      },
     );
   }
 }

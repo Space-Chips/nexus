@@ -13,12 +13,15 @@ class AdPage extends StatefulWidget {
 
 class _AdPageState extends State<AdPage> {
   late BannerAd _bannerAd;
+  late BannerAd _bannerAd2;
   bool _isAdLoaded = false;
+  bool _isAd2Loaded = false;
 
   @override
   void initState() {
     super.initState();
     _initBannerAd();
+    _initBannerAd2();
     // Start a timer to navigate to AuthPage after 3 seconds
     Timer(const Duration(seconds: 10), () {
       Navigator.pushReplacement(
@@ -38,10 +41,26 @@ class _AdPageState extends State<AdPage> {
         },
         onAdFailedToLoad: (ad, error) {},
       ),
-      request: AdRequest(),
+      request: const AdRequest(),
     );
-
     _bannerAd.load();
+  }
+
+  _initBannerAd2() {
+    _bannerAd2 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId2,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAd2Loaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd2.load();
   }
 
   @override
@@ -50,6 +69,7 @@ class _AdPageState extends State<AdPage> {
       backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
         title: const Text("A D  P A G E"),
+        centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
       ),
@@ -63,7 +83,6 @@ class _AdPageState extends State<AdPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 50),
-                    const SizedBox(height: 50),
                     Column(
                       children: <Widget>[
                         Text(
@@ -73,13 +92,34 @@ class _AdPageState extends State<AdPage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        _isAdLoaded
-                            ? Container(
-                                height: _bannerAd.size.height.toDouble(),
-                                width: _bannerAd.size.width.toDouble(),
-                                child: AdWidget(ad: _bannerAd),
-                              )
-                            : SizedBox(),
+                        const SizedBox(height: 50),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          margin: const EdgeInsets.only(bottom: 5),
+                          padding: const EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _isAdLoaded
+                                  ? SizedBox(
+                                      height: _bannerAd.size.height.toDouble(),
+                                      width: _bannerAd.size.width.toDouble(),
+                                      child: AdWidget(ad: _bannerAd),
+                                    )
+                                  : const SizedBox(),
+                              _isAd2Loaded
+                                  ? SizedBox(
+                                      height: _bannerAd2.size.height.toDouble(),
+                                      width: _bannerAd2.size.width.toDouble(),
+                                      child: AdWidget(ad: _bannerAd2),
+                                    )
+                                  : const SizedBox(),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ],

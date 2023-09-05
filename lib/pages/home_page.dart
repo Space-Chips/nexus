@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ProfilePage(),
+        builder: (context) => ProfilePage(),
       ),
     );
   }
@@ -137,6 +137,7 @@ class _HomePageState extends State<HomePage> {
           "N E X U S",
           selectionColor: Theme.of(context).colorScheme.primary,
         ),
+        centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
         actions: [
@@ -212,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: MyTextField(
                       controller: textController,
-                      hintText: 'Postez votre rumeur...',
+                      hintText: "Laissez votre non-intelligence briller...",
                       obscureText: false,
                     ),
                   ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/components/admin_chat_post.dart';
 import 'package:nexus/components/text_field.dart';
 import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/user_search_page.dart';
 
 class AdminChatPage extends StatefulWidget {
   const AdminChatPage({super.key});
@@ -93,8 +94,44 @@ class _HomePageState extends State<AdminChatPage> {
           "A D M I N  C H A T",
           selectionColor: Theme.of(context).colorScheme.primary,
         ),
+        centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
+        actions: [
+          // Display the menue
+          PopupMenuButton(
+            icon: Icon(
+              Icons.more_vert,
+            ), // add this line
+            itemBuilder: (_) => <PopupMenuItem<String>>[
+              const PopupMenuItem<String>(
+                value: 'search_messages',
+                child: SizedBox(
+                  width: 100,
+                  // height: 30,
+
+                  child: Text(
+                    "tools",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+            onSelected: (index) async {
+              switch (index) {
+                case 'search_messages':
+                  // go to profile page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserPostsPage(),
+                    ),
+                  );
+                  break;
+              }
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
