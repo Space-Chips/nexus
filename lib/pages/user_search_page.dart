@@ -70,6 +70,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                         user: post['User'],
                         userEmail: post['UserEmail'],
                         isAdminPost: post['isAdminPost'],
+                        mediaDest: post['MediaDestination'],
                         postId: post.id,
                         likes: List<String>.from(post['Likes'] ?? []),
                         time: formatDate(post['TimeStamp']),

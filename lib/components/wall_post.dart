@@ -1,7 +1,8 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/comment.dart';
 import 'package:nexus/components/comment_button.dart';
@@ -16,6 +17,7 @@ class WallPost extends StatefulWidget {
   final String userEmail;
   final String time;
   final String postId;
+  final String mediaDest;
   final bool isAdminPost;
   final List<String> likes;
   const WallPost({
@@ -27,6 +29,7 @@ class WallPost extends StatefulWidget {
     required this.time,
     required this.userEmail,
     required this.isAdminPost,
+    required this.mediaDest,
   });
 
   @override
@@ -46,11 +49,46 @@ class _WallPostState extends State<WallPost> {
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
 
+  // ref for the media system
+  late String mediaUrl;
+  final storage = FirebaseStorage.instance;
+
   @override
   void initState() {
     super.initState();
-    isLiked = widget.likes.contains(currentUser.email);
     fetchUserData();
+    if (widget.mediaDest != null) {
+      getMediaUrl();
+    }
+
+    isLiked = widget.likes.contains(currentUser.email);
+    mediaUrl = '';
+  }
+
+// Retrive media from firebase storage
+  Future<void> getMediaUrl() async {
+    if (widget.mediaDest != null) {
+      final ref = storage.ref().child("files/${widget.mediaDest}");
+
+      try {
+        final url = await ref.getDownloadURL();
+
+        //final storageRef =FirebaseStorage.instance.ref(destination).child("media/");
+        //final listResult = await storageRef.listAll();
+
+        /*for (final item in listResult.items) {
+          print("Item name: ${item.name}");
+          print("Item fullPath: ${item.fullPath}");
+          print("Item bucket: ${item.bucket}");
+        }*/
+
+        setState(() {
+          mediaUrl = url;
+        });
+      } catch (e) {
+        //print("Error fetching media URL: $e");
+      }
+    }
   }
 
   // Fetch user data from Firebase
@@ -285,9 +323,19 @@ class _WallPostState extends State<WallPost> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (widget.mediaDest != "")
+            SizedBox(
+              child: ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the radius as needed
+                child: Image.network(mediaUrl),
+              ),
+            ),
+
+          if (widget.mediaDest != "") const SizedBox(height: 20),
           Text(widget.message),
 
-          // wallpost
+          // Wall post
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,

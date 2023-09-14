@@ -117,6 +117,10 @@ class _AdPageState extends State<AdPage> {
                                       child: AdWidget(ad: _bannerAd2),
                                     )
                                   : const SizedBox(),
+                              if (!_isAdLoaded && !_isAd2Loaded)
+                                Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                             ],
                           ),
                         )

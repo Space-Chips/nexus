@@ -31,10 +31,46 @@
               "client_type": 3
             },
             {
-              "client_id": "8175006174-ndf2nu22er5hn75eh0k2hcigq3n8bkq1.apps.googleusercontent.com",
+              "client_id": "8175006174-0nq29bkhi2iq7brnja2kcvdnotddhb2r.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.nexusremake"
+                "bundle_id": "com.example.nexus.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8175006174:android:6e839f69086080d2b1ed4f",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "8175006174-heiv2fki1rofe8hrmlfjhtisp24sujg9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2X6-FGF2xISeCkGD1xzKFg9r6VIjJH4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "8175006174-heiv2fki1rofe8hrmlfjhtisp24sujg9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "8175006174-0nq29bkhi2iq7brnja2kcvdnotddhb2r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nexus.RunnerTests"
               }
             }
           ]
@@ -67,10 +103,46 @@
               "client_type": 3
             },
             {
-              "client_id": "8175006174-ndf2nu22er5hn75eh0k2hcigq3n8bkq1.apps.googleusercontent.com",
+              "client_id": "8175006174-0nq29bkhi2iq7brnja2kcvdnotddhb2r.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.nexusremake"
+                "bundle_id": "com.example.nexus.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8175006174:android:39bb96e7a6a3c340b1ed4f",
+        "android_client_info": {
+          "package_name": "com.nexuslinkid.linkup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "8175006174-heiv2fki1rofe8hrmlfjhtisp24sujg9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2X6-FGF2xISeCkGD1xzKFg9r6VIjJH4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "8175006174-heiv2fki1rofe8hrmlfjhtisp24sujg9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "8175006174-0nq29bkhi2iq7brnja2kcvdnotddhb2r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nexus.RunnerTests"
               }
             }
           ]

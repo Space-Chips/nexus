@@ -1,13 +1,17 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, depend_on_referenced_packages, library_prefixes
 
+import 'dart:io';
+
+import 'package:nexus/components/post_field.dart';
+import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/drawer.dart';
-import 'package:nexus/components/text_field.dart';
 import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/admin_chat.dart';
@@ -27,6 +31,13 @@ class _HomePageState extends State<HomePage> {
 
   // text controller
   final textController = TextEditingController();
+
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  File? _photo;
+  final ImagePicker _picker = ImagePicker();
+  Widget _selectedImageWidget = Container();
 
   bool isAdminState = false;
   String usernameState = "Test";
@@ -69,10 +80,60 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future imgFromGallery() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _photo = File(pickedFile.path);
+        uploadFile();
+
+        // Display the selected image
+        _selectedImageWidget = Image.file(_photo!);
+      } else {
+        //print('No image selected.');
+      }
+    });
+  }
+
+  Future imgFromCamera() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      if (pickedFile != null) {
+        _photo = File(pickedFile.path);
+        uploadFile();
+      } else {
+        //print('No image selected.');
+      }
+    });
+  }
+
+  Future uploadFile() async {
+    if (_photo == null) return;
+    final fileName = Path.basename(_photo!.path);
+    const destination = 'files/';
+
+    try {
+      final ref = firebase_storage.FirebaseStorage.instance
+          .ref(destination)
+          .child('media/$fileName');
+      await ref.putFile(_photo!);
+    } catch (e) {
+      //print('Error occurred while uploading file: $e');
+    }
+  }
+
   // post message
-  void postMessage() {
+  void postMessage() async {
     // only post if there is something in the textfield
     if (textController.text.isNotEmpty) {
+      String? fileName;
+
+      if (_photo != null) {
+        fileName = Path.basename(_photo!.path);
+      }
+
       // store in firebase
       FirebaseFirestore.instance.collection("Posts").add({
         'UserEmail': emailState,
@@ -80,11 +141,17 @@ class _HomePageState extends State<HomePage> {
         'Message': textController.text,
         'isAdminPost': isAdminState,
         'TimeStamp': Timestamp.now(),
+        'MediaDestination': fileName != null ? 'media/$fileName' : '',
         'Likes': [],
       });
-    }
+      textController.clear();
 
-    textController.clear();
+      // Clear the selected image
+      setState(() {
+        _selectedImageWidget = Container();
+        _photo = null; // Clear the selected photo
+      });
+    }
   }
 
   // navigate to profile page
@@ -185,6 +252,7 @@ class _HomePageState extends State<HomePage> {
                           user: post['User'],
                           userEmail: post['UserEmail'],
                           isAdminPost: post['isAdminPost'],
+                          mediaDest: post['MediaDestination'],
                           postId: post.id,
                           likes: List<String>.from(post['Likes'] ?? []),
                           time: formatDate(post['TimeStamp']),
@@ -211,10 +279,12 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   // textfield
                   Expanded(
-                    child: MyTextField(
+                    child: MyPostField(
                       controller: textController,
-                      hintText: "Laissez votre non-intelligence briller...",
+                      hintText: "Post a message...",
                       obscureText: false,
+                      imgFromGallery: imgFromGallery,
+                      imgFromCamera: imgFromCamera,
                     ),
                   ),
 
@@ -231,6 +301,47 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: 25),
               child: Text("Logged in as : ${currentUser.email!}"),
             ),
+            if (_photo != null)
+              _selectedImageWidget = Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(25.0),
+                          bottomLeft: Radius.circular(25.0),
+                          topRight: Radius.circular(25.0),
+                          bottomRight: Radius.circular(25.0),
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(25.0),
+                          bottomLeft: Radius.circular(25.0),
+                          topRight: Radius.circular(25.0),
+                          bottomRight: Radius.circular(25.0),
+                        ),
+                        child: _selectedImageWidget,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 10.0, // Adjust the position as needed
+                    left: 10.0, // Adjust the position as needed
+                    child: IconButton(
+                      onPressed: () {
+                        //print("closed");
+                        setState(() {
+                          _selectedImageWidget = Container();
+                          _photo = null; // Clear the selected photo
+                        });
+                      },
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
