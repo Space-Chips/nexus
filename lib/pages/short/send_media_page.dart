@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, library_prefixes
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';

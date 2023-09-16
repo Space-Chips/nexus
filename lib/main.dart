@@ -7,7 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nexus/auth/auth.dart';
 import 'package:nexus/auth/login_or_register.dart';
 import 'package:nexus/pages/ad_page.dart';
-import 'package:nexus/pages/profile_page.dart';
+import 'package:nexus/pages/settings_page.dart';
 import 'package:nexus/theme/dark_theme.dart';
 import 'package:nexus/theme/light_theme.dart';
 import 'pages/login_page.dart';

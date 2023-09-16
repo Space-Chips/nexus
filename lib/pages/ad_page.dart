@@ -118,7 +118,7 @@ class _AdPageState extends State<AdPage> {
                                     )
                                   : const SizedBox(),
                               if (!_isAdLoaded && !_isAd2Loaded)
-                                Center(
+                                const Center(
                                   child: CircularProgressIndicator(),
                                 ),
                             ],
