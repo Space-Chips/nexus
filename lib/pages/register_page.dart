@@ -47,12 +47,18 @@ class _RegisterPageState extends State<RegisterPage> {
     Future addUsersDetails(String firstName, String lastName, String password,
         String email, int age) async {
       await FirebaseFirestore.instance.collection('users').add({
+        'address': "",
         'admin': false,
+        'followers': [],
+        'interests': [],
+        'relationshipStatus': false,
+        'joinDate': Timestamp.now(),
         'username': emailTextController.text.split('@')[0], // initial username
         'bio': 'Empty bio...', // initial empty bio
         'first name': firstName,
         'last name': lastName,
         'password': password,
+        'website': "",
         'email': email,
         'age': age,
       });

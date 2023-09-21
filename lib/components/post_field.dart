@@ -30,6 +30,7 @@ class MyPostField extends StatelessWidget {
           obscureText: obscureText,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(8.0),
               borderSide:
                   BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),

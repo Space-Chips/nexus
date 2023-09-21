@@ -3,7 +3,8 @@
 import 'dart:io';
 
 import 'package:nexus/components/post_field.dart';
-import 'package:nexus/pages/profile_page.dart';
+import 'package:nexus/pages/settings_page.dart';
+import 'package:nexus/pages/user_search_page.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,7 +18,6 @@ import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
-import 'package:nexus/pages/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -155,6 +155,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // navigate to the search page
+  void goToSearchPage() {
+    // pop menu drawer
+    Navigator.pop(context);
+
+    // go to research page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserSearch(),
+      ),
+    );
+  }
+
   // navigate to profile page
   void goToProfilePage() {
     // pop menu drawer
@@ -164,9 +178,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfilePage(
-          username: "test username",
-        ),
+        builder: (context) => ProfilePageSettings(),
       ),
     );
   }
@@ -220,6 +232,8 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: MyDrawer(
+        onSearchTap: goToSearchPage,
+        onSignOut: signOut,
         onProfileTap: goToProfilePage,
         onLiveChatTap: goToLiveChatPage,
         onAdminChatTap: goToAdminChatPage,
@@ -228,7 +242,6 @@ class _HomePageState extends State<HomePage> {
           AdaptiveTheme.of(context).toggleThemeMode();
           // Wrap in a function
         },
-        onSignOut: signOut,
       ),
       body: Center(
         child: Column(

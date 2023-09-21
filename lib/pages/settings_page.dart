@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/editable_text_box.dart';
+import 'package:nexus/components/wall_post.dart';
+import 'package:nexus/helper/helper_methods.dart';
 
 class ProfilePageSettings extends StatefulWidget {
   const ProfilePageSettings({super.key});
@@ -13,9 +15,17 @@ class ProfilePageSettings extends StatefulWidget {
 }
 
 class _ProfilePageSettingsState extends State<ProfilePageSettings> {
-  final currentUser = FirebaseAuth.instance.currentUser!;
   late String username;
+  late String address;
+  late String website;
   late String updatedValue; // Declare updatedValue as a class-level variable
+  late bool admin;
+
+  // user
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
+  bool showPosts = true;
+  bool isFollowing = false;
 
   // Define the displayMessage method
   void displayMessage(String message) {
@@ -165,6 +175,7 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text("P R O F I L E  P A G E"),
+        centerTitle: true,
         elevation: 0,
       ),
       body: FutureBuilder<QuerySnapshot>(
@@ -180,28 +191,94 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
 
             var userDocument = snapshot.data!.docs[0];
             username = userDocument['username'];
+            address = userDocument['address'];
+            website = userDocument['website'];
+            admin = userDocument['admin'];
 
             return ListView(
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 25),
                 Icon(
                   Icons.person,
                   size: 72,
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 25),
                 Text(
-                  currentUser.email!,
+                  username,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700]),
+                  style: TextStyle(color: Colors.grey[700], fontSize: 13),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 25.0),
-                  child: Text(
-                    'My Details',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center the Row horizontally
+                  children: [
+                    if (address != "")
+                      Icon(
+                        Icons.location_pin,
+                        color: Colors.grey[700],
+                        size: 20,
+                      ),
+                    if (address != "")
+                      Text(
+                        userDocument['address'],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                    if (address != "") SizedBox(width: 20),
+                    Icon(
+                      Icons.calendar_month_rounded,
+                      color: Colors.grey[700],
+                      size: 20,
                     ),
-                  ),
+                    Text(
+                      "Joined ${formatDate(userDocument['joinDate'])}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+                    if (website != "")
+                      Icon(
+                        Icons.link_outlined,
+                        color: Colors.grey[700],
+                        size: 20,
+                      ),
+                    if (website != "")
+                      Text(
+                        website,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    if (admin == true) SizedBox(width: 20),
+                    if (admin == true)
+                      Icon(
+                        Icons.shield_outlined,
+                        color: Colors.grey[700],
+                        size: 20,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center the Row horizontally
+                  children: [
+                    Text(userDocument['followers'].length.toString(),
+                        style: TextStyle(color: Colors.grey[700])),
+                    const SizedBox(width: 10),
+                    Text(
+                      userDocument['followers'].length == 1
+                          ? 'follower'
+                          : 'followers', // Replace 'Other Text' with what you want to display when followers' length is not 1
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+
+                    /*Text(
+                      userDocument['followers'],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),*/
+                  ],
                 ),
                 MyEditableTextBox(
                   text: username, // Now you can use the username variable here
@@ -213,7 +290,6 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                   sectionName: 'bio',
                   onPressed: () => editField("bio"),
                 ),
-                const SizedBox(height: 50),
                 SizedBox(
                   width: double
                       .infinity, // Make sure the container is as wide as its parent
@@ -238,17 +314,61 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                       ),
                     ),
                   ),
-                )
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: Text(
+                    'My posts',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection("Posts")
+                      .where('UserEmail', isEqualTo: currentUser.email)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Align(
+                        alignment: Alignment.center,
+                        child: Center(
+                          child: Text('No posts found.'),
+                        ),
+                      );
+                    }
 
-                //Padding(
-                //  padding: const EdgeInsets.only(left: 25.0),
-                //  child: Text(
-                //    'My posts',
-                //    style: TextStyle(
-                //      color: Colors.grey[600],
-                //    ),
-                //  ),
-                //),
+                    // Display the posts in a ListView
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        final post = snapshot.data!.docs[index];
+                        return WallPost(
+                          message: post['Message'] ?? '',
+                          user: post['User'] ?? '',
+                          userEmail: post['UserEmail'] ?? '',
+                          isAdminPost: post['isAdminPost'] ?? false,
+                          mediaDest: post['MediaDestination'] ?? '',
+                          postId: post.id,
+                          likes: List<String>.from(post['Likes'] ?? []),
+                          time: formatDate(post['TimeStamp'] ??
+                              DateTime.now()), // Update with post timestamp
+                        );
+                      },
+                    );
+                  },
+                )
               ],
             );
           }),

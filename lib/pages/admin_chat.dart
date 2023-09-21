@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/components/admin_chat_post.dart';
 import 'package:nexus/components/text_field.dart';
 import 'package:nexus/helper/helper_methods.dart';
-import 'package:nexus/pages/user_search_page.dart';
+import 'package:nexus/pages/tools/user_chat_search_page.dart';
 
 class AdminChatPage extends StatefulWidget {
   const AdminChatPage({super.key});

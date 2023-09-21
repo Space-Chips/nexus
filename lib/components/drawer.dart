@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/components/my_list_tile.dart';
 
 class MyDrawer extends StatelessWidget {
+  final void Function()? onSearchTap;
   final void Function()? onProfileTap;
   final void Function()? onLiveChatTap;
   final void Function()? onAdminChatTap;
@@ -12,6 +13,7 @@ class MyDrawer extends StatelessWidget {
   final bool isAdmin;
   const MyDrawer({
     super.key,
+    required this.onSearchTap,
     required this.onProfileTap,
     required this.onLiveChatTap,
     required this.onAdminChatTap,
@@ -42,6 +44,12 @@ class MyDrawer extends StatelessWidget {
                 icon: Icons.home,
                 text: 'H O M E',
                 onTap: () => Navigator.pop(context),
+              ),
+              // profile sarch list tile
+              MyListTile(
+                icon: Icons.search_outlined,
+                text: 'S E A R C H',
+                onTap: onSearchTap,
               ),
 
               // profile list tile

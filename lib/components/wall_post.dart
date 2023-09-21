@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, avoid_print
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, avoid_print, prefer_typing_uninitialized_variables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,6 +48,7 @@ class _WallPostState extends State<WallPost> {
   final commentTextController = TextEditingController();
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
+  var commentdata;
 
   // ref for the media system
   late String mediaUrl;
@@ -377,31 +378,45 @@ class _WallPostState extends State<WallPost> {
 
                       // Display the menue
                       PopupMenuButton(
-                        icon: Icon(Icons.more_vert,
-                            color: Colors.grey[500]), // add this line
+                        icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              10.0), // Adjust the radius as needed
+                        ),
                         itemBuilder: (_) => <PopupMenuItem<String>>[
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'report',
-                            child: SizedBox(
-                              width: 100,
-                              // height: 30,
-
-                              child: Text(
-                                "Report",
-                                style: TextStyle(color: Colors.red),
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(
+                                  Icons.flag_outlined,
+                                  color: Colors.black,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  "Report",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ],
                             ),
                           ),
                           if (isAdminState == true)
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'delete',
-                              child: SizedBox(
-                                width: 100,
-                                // height: 30,
-                                child: Text(
-                                  "Delete",
-                                  style: TextStyle(color: Colors.red),
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(
+                                    Icons.delete_outlined,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "Delete",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ],
                               ),
                             ),
                         ],
@@ -415,7 +430,7 @@ class _WallPostState extends State<WallPost> {
                               break;
                           }
                         },
-                      ),
+                      )
                     ],
                   ),
                 ],
