@@ -46,6 +46,10 @@ class _RegisterPageState extends State<RegisterPage> {
   Future signUp() async {
     Future addUsersDetails(String firstName, String lastName, String password,
         String email, int age) async {
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(); // Create a new document reference with an automatically generated ID
+      final docId = docRef.id; // Get the generated document ID
       await FirebaseFirestore.instance.collection('users').add({
         'address': "",
         'admin': false,
@@ -58,6 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'first name': firstName,
         'last name': lastName,
         'password': password,
+        'userId': docId,
         'website': "",
         'email': email,
         'age': age,

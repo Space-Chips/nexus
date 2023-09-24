@@ -46,30 +46,46 @@ class MyPostField extends StatelessWidget {
           ),
         ),
         // Display the menue
+
         PopupMenuButton(
-          icon: Icon(Icons.more_vert, color: Colors.grey[500]), // add this line
+          icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(10.0), // Adjust the radius as needed
+          ),
           itemBuilder: (_) => <PopupMenuItem<String>>[
             const PopupMenuItem<String>(
               value: 'imgFromGallery',
-              child: SizedBox(
-                width: 100,
-                // height: 30,
-
-                child: Text(
-                  "add image",
-                  style: TextStyle(color: Colors.red),
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.image_outlined,
+                    color: Colors.black,
+                  ),
+                  SizedBox(width: 7),
+                  Text(
+                    "Add Image",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
             ),
             const PopupMenuItem<String>(
               value: 'imgFromCamera',
-              child: SizedBox(
-                width: 100,
-                // height: 30,
-                child: Text(
-                  "take image",
-                  style: TextStyle(color: Colors.red),
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.photo_camera_outlined,
+                    color: Colors.black,
+                  ),
+                  SizedBox(width: 7),
+                  Text(
+                    "Take Image",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
             ),
           ],

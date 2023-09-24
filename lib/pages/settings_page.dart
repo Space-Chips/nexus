@@ -329,6 +329,7 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                   stream: FirebaseFirestore.instance
                       .collection("Posts")
                       .where('UserEmail', isEqualTo: currentUser.email)
+                      .orderBy("TimeStamp", descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {

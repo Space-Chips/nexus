@@ -41,8 +41,10 @@ class _HomePageState extends State<HomePage> {
   Widget _selectedImageWidget = Container();
 
   bool isAdminState = false;
-  String usernameState = "Test";
-  String emailState = "Test";
+  String usernameState =
+      "Test Username (please contact me on play store in case you see this)";
+  String emailState = "Test user Email";
+  String userId = "Test user Id";
 
   @override
   void initState() {
@@ -69,12 +71,14 @@ class _HomePageState extends State<HomePage> {
       var username = userData['username'];
       var isAdmin = userData['admin'];
       var email = userData['email'];
+      var user_Id = userData['userId'];
 
       setState(() {
         // Update isAdmin and username in the state
         usernameState = username;
         isAdminState = isAdmin;
         emailState = email;
+        user_Id = userId;
       });
     } else {
       //print("User data not found");
@@ -139,6 +143,7 @@ class _HomePageState extends State<HomePage> {
       FirebaseFirestore.instance.collection("Posts").add({
         'UserEmail': emailState,
         'User': usernameState,
+        'UserId': userId,
         'Message': textController.text,
         'isAdminPost': isAdminState,
         'TimeStamp': Timestamp.now(),
@@ -358,6 +363,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+            if (_photo != null) SizedBox(height: 10),
           ],
         ),
       ),

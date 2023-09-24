@@ -8,6 +8,7 @@ import 'package:nexus/components/comment.dart';
 import 'package:nexus/components/comment_button.dart';
 import 'package:nexus/components/delet_button.dart';
 import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/image_page.dart';
 
 import 'like_button.dart';
 
@@ -37,58 +38,51 @@ class WallPost extends StatefulWidget {
 }
 
 class _WallPostState extends State<WallPost> {
-  // user
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   bool isAdminState = false;
   String usernameState = "usernameState";
   String userEmail = "userEmail";
-
-  // comment text controller
+  String postUsername = "Test Username";
   final commentTextController = TextEditingController();
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
   var commentdata;
-
-  // ref for the media system
-  late String mediaUrl;
+  late String mediaUrl = ""; // Initialize mediaUrl with an empty string
   final storage = FirebaseStorage.instance;
+  bool _isDisposed = false; // Add a flag to check if the widget is disposed
 
   @override
   void initState() {
     super.initState();
     fetchUserData();
-    if (widget.mediaDest != null) {
+    //fetchIdData();
+    if (widget.mediaDest.isNotEmpty) {
       getMediaUrl();
     }
-
     isLiked = widget.likes.contains(currentUser.email);
-    mediaUrl = '';
   }
 
-// Retrive media from firebase storage
+  @override
+  void dispose() {
+    _isDisposed = true; // Set the flag when the widget is disposed
+    super.dispose();
+  }
+
   Future<void> getMediaUrl() async {
-    if (widget.mediaDest != null) {
-      final ref = storage.ref().child("files/${widget.mediaDest}");
+    final ref = storage.ref().child("files/${widget.mediaDest}");
 
-      try {
-        final url = await ref.getDownloadURL();
+    try {
+      final url = await ref.getDownloadURL();
 
-        //final storageRef =FirebaseStorage.instance.ref(destination).child("media/");
-        //final listResult = await storageRef.listAll();
-
-        /*for (final item in listResult.items) {
-          print("Item name: ${item.name}");
-          print("Item fullPath: ${item.fullPath}");
-          print("Item bucket: ${item.bucket}");
-        }*/
-
+      // Check if the widget is still active before calling setState
+      if (!_isDisposed) {
         setState(() {
           mediaUrl = url;
         });
-      } catch (e) {
-        //print("Error fetching media URL: $e");
       }
+    } catch (e) {
+      // Handle error
     }
   }
 
@@ -96,8 +90,7 @@ class _WallPostState extends State<WallPost> {
   void fetchUserData() async {
     QuerySnapshot userSnapshot = await FirebaseFirestore.instance
         .collection("users")
-        .where("email",
-            isEqualTo: currentUser.email) // Use the current user's email
+        .where("email", isEqualTo: currentUser.email)
         .get();
 
     if (userSnapshot.docs.isNotEmpty) {
@@ -117,6 +110,29 @@ class _WallPostState extends State<WallPost> {
       //print("User data not found");
     }
   }
+
+  // Fetch user data from Firebase
+  /*void fetchIdData() async {
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("userId", isEqualTo: widget.userId)
+        .get();
+
+    if (userSnapshot.docs.isNotEmpty) {
+      // Check if any documents match the query
+      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+      var username = userData['username'];
+      var isAdmin = userData['admin'];
+
+      setState(() {
+        // Update isAdmin and username in the state
+        isAdminState = isAdmin;
+        postUsername = username;
+      });
+    } else {
+      //print("User data not found");
+    }
+  }*/
 
   // toggle like
   void toggleLike() {
@@ -312,6 +328,25 @@ class _WallPostState extends State<WallPost> {
     );
   }
 
+  // navigate to the search page
+  void openFullScreenPage() {
+    // pop menu drawer
+    Navigator.pop(context);
+
+    // go to research page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FullScreenImg(
+          photoUrl: mediaUrl,
+          message: widget.message,
+          username: widget.user,
+          timeStamp: widget.time,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -320,20 +355,24 @@ class _WallPostState extends State<WallPost> {
         borderRadius: BorderRadius.circular(8),
       ),
       margin: EdgeInsets.only(top: 25, left: 25, right: 25),
-      padding: EdgeInsets.all(25),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.mediaDest != "")
-            SizedBox(
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(8), // Adjust the radius as needed
-                child: Image.network(mediaUrl),
+            GestureDetector(
+              onTap: openFullScreenPage, // Open full screen on tap
+              child: SizedBox(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(mediaUrl),
+                ),
               ),
             ),
 
           if (widget.mediaDest != "") const SizedBox(height: 20),
+          if (widget.mediaDest == "") const SizedBox(height: 5),
+
           Text(widget.message),
 
           // Wall post
@@ -484,8 +523,6 @@ class _WallPostState extends State<WallPost> {
             ],
           ),
 
-          const SizedBox(height: 20),
-
           // comments under the post
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -495,32 +532,48 @@ class _WallPostState extends State<WallPost> {
                 .orderBy("CommentTime", descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
-              // show loading cirlce if no data yet
+              // show loading circle if no data yet
               if (!snapshot.hasData) {
                 return const Center(
                   child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  ),
                 );
               }
 
-              return ListView(
-                shrinkWrap: true, // for nested lists
-                physics: const NeverScrollableScrollPhysics(),
-                children: snapshot.data!.docs.map((doc) {
-                  // get the comment
-                  final commentData = doc.data() as Map<String, dynamic>;
+              // Conditional SizedBox to show only if there are comments
+              final hasComments = snapshot.data!.docs.isNotEmpty;
 
-                  // return the comment
-                  return Comment(
-                    text: commentData["CommentText"],
-                    user: commentData["CommentedBy"],
-                    usernameState: commentData["CommentedBy"],
-                    time: formatDate(commentData["CommentTime"]),
-                  );
-                }).toList(),
+              return Column(
+                children: [
+                  if (hasComments)
+                    SizedBox(height: 20)
+                  else
+                    SizedBox(height: 5),
+                  if (mediaUrl != null) SizedBox(height: 5),
+
+                  // Rest of your code
+                  ListView(
+                    shrinkWrap: true, // for nested lists
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: snapshot.data!.docs.map((doc) {
+                      // get the comment
+                      final commentData = doc.data() as Map<String, dynamic>;
+
+                      // return the comment
+                      return Comment(
+                        text: commentData["CommentText"],
+                        user: commentData["CommentedBy"],
+                        usernameState: commentData["CommentedBy"],
+                        time: formatDate(commentData["CommentTime"]),
+                      );
+                    }).toList(),
+                  ),
+                ],
               );
             },
           ),
+
           // Display the User Email for admins
           //if (isAdminState == true)
           //  Text(

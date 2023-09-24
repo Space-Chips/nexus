@@ -17,7 +17,7 @@ String formatDate(Timestamp timestamp) {
   String day = dateTime.day.toString();
 
   //final formatted date
-  String formattedDate = '$day/$month$year';
+  String formattedDate = '$day/$month/$year';
 
   return formattedDate;
 }

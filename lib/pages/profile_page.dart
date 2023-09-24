@@ -230,9 +230,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             isFollowing ? Colors.white : Colors.blue),
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
                           EdgeInsets.symmetric(
-                              vertical: 10,
+                              vertical:
+                                  5, // Adjust the vertical padding as needed
                               horizontal:
-                                  10), // Adjust horizontal padding as needed
+                                  10), // Adjust the horizontal padding as needed
                         ),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -317,6 +318,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         stream: FirebaseFirestore.instance
                             .collection("Posts")
                             .where('User', isEqualTo: widget.username)
+                            .orderBy("TimeStamp", descending: true)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -364,6 +366,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         stream: FirebaseFirestore.instance
                             .collection("Chat")
                             .where('User', isEqualTo: widget.username)
+                            .orderBy("TimeStamp", descending: true)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
