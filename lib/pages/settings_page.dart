@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -173,10 +175,29 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: Text("P R O F I L E  P A G E"),
-        centerTitle: true,
-        elevation: 0,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: Size(
+          double.infinity,
+          56.0,
+        ),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+            child: AppBar(
+              title: Text(
+                "P R O F I L E  P A G E",
+                selectionColor: Theme.of(context).colorScheme.primary,
+              ),
+              centerTitle: true,
+
+              elevation: 0.0,
+              // backgroundColor: Colors.black.withOpacity(0.2),
+              backgroundColor:
+                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<QuerySnapshot>(
           future: docRef,
@@ -197,89 +218,121 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
 
             return ListView(
               children: [
-                const SizedBox(height: 25),
-                Icon(
+                // const SizedBox(height: 25),
+                /*Icon(
                   Icons.person,
                   size: 72,
-                ),
-                const SizedBox(height: 25),
-                Text(
-                  username,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the Row horizontally
-                  children: [
-                    if (address != "")
-                      Icon(
-                        Icons.location_pin,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                    if (address != "")
-                      Text(
-                        userDocument['address'],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    if (address != "") SizedBox(width: 20),
-                    Icon(
-                      Icons.calendar_month_rounded,
-                      color: Colors.grey[700],
-                      size: 20,
-                    ),
-                    Text(
-                      "Joined ${formatDate(userDocument['joinDate'])}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    if (website != "")
-                      Icon(
-                        Icons.link_outlined,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                    if (website != "")
-                      Text(
-                        website,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    if (admin == true) SizedBox(width: 20),
-                    if (admin == true)
-                      Icon(
-                        Icons.shield_outlined,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the Row horizontally
-                  children: [
-                    Text(userDocument['followers'].length.toString(),
-                        style: TextStyle(color: Colors.grey[700])),
-                    const SizedBox(width: 10),
-                    Text(
-                      userDocument['followers'].length == 1
-                          ? 'follower'
-                          : 'followers', // Replace 'Other Text' with what you want to display when followers' length is not 1
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
+                ),*/
 
-                    /*Text(
-                      userDocument['followers'],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),*/
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 180.0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(22.0),
+                            color: Theme.of(context).colorScheme.primary),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 20),
+                              Center(
+                                child: Text(
+                                  username[0].toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 50,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[100],
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                username,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.grey[700], fontSize: 13),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (address != "")
+                                    Icon(
+                                      Icons.location_pin,
+                                      color: Colors.grey[700],
+                                      size: 20,
+                                    ),
+                                  if (address != "")
+                                    Text(
+                                      userDocument['address'],
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: Colors.grey[700]),
+                                    ),
+                                  if (address != "") SizedBox(width: 20),
+                                  Icon(
+                                    Icons.calendar_month_rounded,
+                                    color: Colors.grey[700],
+                                    size: 20,
+                                  ),
+                                  Text(
+                                    "Joined ${formatDate(userDocument['joinDate'])}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                  if (website != "")
+                                    Icon(
+                                      Icons.link_outlined,
+                                      color: Colors.grey[700],
+                                      size: 20,
+                                    ),
+                                  if (website != "")
+                                    Text(
+                                      website,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: Colors.blue),
+                                    ),
+                                  if (admin == true) SizedBox(width: 20),
+                                  if (admin == true)
+                                    Icon(
+                                      Icons.shield_outlined,
+                                      color: Colors.grey[700],
+                                      size: 20,
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    userDocument['followers'].length.toString(),
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    userDocument['followers'].length == 1
+                                        ? 'follower'
+                                        : 'followers',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+                // const SizedBox(height: 10),
+
                 MyEditableTextBox(
                   text: username, // Now you can use the username variable here
                   sectionName: 'username',
@@ -356,15 +409,18 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                       itemBuilder: (context, index) {
                         final post = snapshot.data!.docs[index];
                         return WallPost(
-                          message: post['Message'] ?? '',
-                          user: post['User'] ?? '',
-                          userEmail: post['UserEmail'] ?? '',
-                          isAdminPost: post['isAdminPost'] ?? false,
-                          mediaDest: post['MediaDestination'] ?? '',
+                          message: post['Message'],
+                          user: post['User'],
+                          userEmail: post['UserEmail'],
+                          isAdminPost: post['isAdminPost'],
+                          mediaDest: post['MediaDestination'],
+                          contextText: post['Context'],
                           postId: post.id,
                           likes: List<String>.from(post['Likes'] ?? []),
-                          time: formatDate(post['TimeStamp'] ??
-                              DateTime.now()), // Update with post timestamp
+                          views: List<String>.from(post['Views'] ?? []),
+                          /*comments:
+                              List<String>.from(post['CommentCount'] ?? []),*/
+                          time: formatDate(post['TimeStamp']),
                         );
                       },
                     );

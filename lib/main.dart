@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, depend_on_referenced_packages
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
               color: Colors.grey[900],
             ),
           ),
-          nextScreen: const AdPage(),
+          nextScreen: const AuthPage(),
         ),
         debugShowCheckedModeBanner: false,
         theme: theme,

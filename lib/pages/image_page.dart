@@ -11,6 +11,7 @@ class FullScreenImg extends StatefulWidget {
   final String message;
   final String username;
   final String timeStamp;
+
   const FullScreenImg({
     Key? key,
     required this.photoUrl,
@@ -24,7 +25,6 @@ class FullScreenImg extends StatefulWidget {
 }
 
 class _FullScreenImgState extends State<FullScreenImg> {
-  // Add a GlobalKey for the Scaffold to access the ScaffoldState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -32,13 +32,11 @@ class _FullScreenImgState extends State<FullScreenImg> {
     super.initState();
   }
 
-  //sign user out
   void signOut() {
     FirebaseAuth.instance.signOut();
   }
 
   void goToAdminChatPage() {
-    // Navigate to the admin chat page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -47,8 +45,17 @@ class _FullScreenImgState extends State<FullScreenImg> {
     );
   }
 
+  // display a dialog message
+  void displayMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(message),
+      ),
+    );
+  }
+
   void goToHomePage() {
-    // Navigate to the admin chat page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -61,69 +68,85 @@ class _FullScreenImgState extends State<FullScreenImg> {
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     return Scaffold(
-      key: _scaffoldKey, // Assign the scaffold key
+      key: _scaffoldKey,
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         leading: IconButton(
           icon: Icon(
-            Icons.close,
+            Icons.arrow_back,
             color: Colors.white,
           ),
           onPressed: () {
-            goToHomePage(); // Add parentheses to call the function
+            goToHomePage();
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.share, // Add a share button
+              color: Colors.white,
+            ),
+            onPressed: () {
+              displayMessage("Coming Soon");
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(widget.photoUrl),
-                  ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  widget.photoUrl,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress != null) {
+                      return CircularProgressIndicator();
+                    }
+                    if (child == null) {
+                      return Text(
+                        'Failed to load image', // Handle image loading error
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      );
+                    }
+                    return child;
+                  },
                 ),
               ),
             ),
-            const SizedBox(height: 25),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end, // Align at the bottom
-              children: [
-                if (widget.photoUrl != "") const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
                     widget.message,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Text(
-                      widget.username, // Use the correct variable name
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                    Text(
-                      "  ",
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                    Text(
-                      widget.timeStamp, // Use the correct variable name
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                  ],
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Text(
+                    '${widget.username} • ${widget.timeStamp}',
+                    style: TextStyle(color: Colors.grey[400]),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

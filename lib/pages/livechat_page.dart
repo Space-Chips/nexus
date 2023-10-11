@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, depend_on_referenced_packages
 
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -86,9 +88,29 @@ class _HomePageState extends State<LiveChatPage> {
     Firebase.initializeApp();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: Text("L I V E  C H A T"),
-        elevation: 0,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: Size(
+          double.infinity,
+          56.0,
+        ),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+            child: AppBar(
+              title: Text(
+                "L I V E  C H A T",
+                selectionColor: Theme.of(context).colorScheme.primary,
+              ),
+              centerTitle: true,
+
+              elevation: 0.0,
+              // backgroundColor: Colors.black.withOpacity(0.2),
+              backgroundColor:
+                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: Column(

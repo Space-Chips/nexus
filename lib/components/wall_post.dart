@@ -6,9 +6,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/comment.dart';
 import 'package:nexus/components/comment_button.dart';
+import 'package:nexus/components/community_context.dart';
 import 'package:nexus/components/delet_button.dart';
+import 'package:nexus/components/text_field.dart';
 import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/image_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:nexus/pages/profile_page.dart';
 
 import 'like_button.dart';
 
@@ -19,14 +23,20 @@ class WallPost extends StatefulWidget {
   final String time;
   final String postId;
   final String mediaDest;
+  final String contextText;
   final bool isAdminPost;
   final List<String> likes;
+  final List<String> views;
+  //final List<String> comments;
   const WallPost({
     super.key,
     required this.message,
     required this.user,
     required this.postId,
     required this.likes,
+    required this.views,
+    required this.contextText,
+    //required this.comments,
     required this.time,
     required this.userEmail,
     required this.isAdminPost,
@@ -51,11 +61,15 @@ class _WallPostState extends State<WallPost> {
   late String mediaUrl = ""; // Initialize mediaUrl with an empty string
   final storage = FirebaseStorage.instance;
   bool _isDisposed = false; // Add a flag to check if the widget is disposed
+  bool isCommentDialogOpen = false;
+  int commentNumber = 0;
 
   @override
   void initState() {
     super.initState();
     fetchUserData();
+    addView();
+    getCommentNumber();
     //fetchIdData();
     if (widget.mediaDest.isNotEmpty) {
       getMediaUrl();
@@ -67,6 +81,18 @@ class _WallPostState extends State<WallPost> {
   void dispose() {
     _isDisposed = true; // Set the flag when the widget is disposed
     super.dispose();
+  }
+
+  Future<void> getCommentNumber() async {
+    var docs = await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments')
+        .get();
+    final int count = docs.size;
+    setState(() {
+      commentNumber = count;
+    });
   }
 
   Future<void> getMediaUrl() async {
@@ -109,6 +135,33 @@ class _WallPostState extends State<WallPost> {
     } else {
       //print("User data not found");
     }
+  }
+
+  // Add the user email to the view map
+  void addView() {
+    // Acces the document is Firebase
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('Posts').doc(widget.postId);
+
+    postRef.update({
+      'Views': FieldValue.arrayUnion([currentUser.email])
+    });
+  }
+
+  // navigate to profile page
+  void goToProfilePage(String username) {
+    // pop menu drawer
+    Navigator.pop(context);
+
+    // go to profile page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(
+          username: username,
+        ),
+      ),
+    );
   }
 
   // Fetch user data from Firebase
@@ -159,6 +212,13 @@ class _WallPostState extends State<WallPost> {
 
   // add a comment
   void addComment(String commentText) {
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('Posts').doc(widget.postId);
+
+    postRef.update({
+      'CommentNumber': FieldValue.arrayUnion([currentUser.email]),
+    });
+
     // write the comment  to firestore under the comments
     FirebaseFirestore.instance
         .collection("Posts")
@@ -187,8 +247,50 @@ class _WallPostState extends State<WallPost> {
     );
   }
 
+  // post context
+  void postContext(String text) {
+    // store in firebase
+
+    FirebaseFirestore.instance.collection("Posts").doc(widget.postId).update({
+      'Context': text,
+    });
+  }
+
+  // show comments
+  void showComments() {
+    if (isCommentDialogOpen == true) {
+      setState(() {
+        isCommentDialogOpen = false;
+      });
+    } else {
+      setState(() {
+        isCommentDialogOpen = true;
+      });
+    }
+  }
+
+  // post comment method
+  void postComment() {
+    if (commentTextController.text.isNotEmpty) {
+      // add comment
+      addComment(commentTextController.text);
+      // pop box
+      commentTextController.clear();
+    }
+  }
+
   // show a dialog box for adding a comment
   void showCommentDialog() {
+    if (isCommentDialogOpen == true) {
+      setState(() {
+        isCommentDialogOpen = false;
+      });
+    } else {
+      setState(() {
+        isCommentDialogOpen = true;
+      });
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -247,6 +349,48 @@ class _WallPostState extends State<WallPost> {
                 // add coment
                 postReport(
                     "⚠️REPORT⚠️ $userEmail just reported a post !! It reports ${widget.userEmail}, he says that ${reportTextController.text} / the post id is ${widget.postId} ");
+                // pop box
+                reportTextController.clear();
+                Navigator.pop(context);
+              } else {
+                // pop box
+                commentTextController.clear();
+                Navigator.pop(context);
+              }
+            },
+            child: Text("S E N D"),
+          ),
+
+          // cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "C A N C E L",
+              selectionColor: Colors.blue,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // send a report message
+  void showContextDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("C O N T E X T"),
+        content: TextField(
+          controller: reportTextController,
+          decoration: InputDecoration(hintText: "Add details..."),
+        ),
+        actions: [
+          // save button
+          TextButton(
+            onPressed: () {
+              if (reportTextController.text.isNotEmpty) {
+                // add coment
+                postContext(reportTextController.text);
                 // pop box
                 reportTextController.clear();
                 Navigator.pop(context);
@@ -360,12 +504,18 @@ class _WallPostState extends State<WallPost> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.mediaDest != "")
-            GestureDetector(
-              onTap: openFullScreenPage, // Open full screen on tap
+            Center(
               child: SizedBox(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(mediaUrl),
+                  borderRadius: BorderRadius.circular(15),
+                  child: CachedNetworkImage(
+                    imageUrl: mediaUrl,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.error,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -391,10 +541,16 @@ class _WallPostState extends State<WallPost> {
                   // user
                   Row(
                     children: [
-                      Text(
-                        widget.user,
-                        style: TextStyle(color: Colors.grey[400]),
+                      GestureDetector(
+                        onTap: () {
+                          goToProfilePage(widget.user);
+                        },
+                        child: Text(
+                          widget.user,
+                          style: TextStyle(color: Colors.grey[400]),
+                        ),
                       ),
+
                       Text(
                         "  ",
                         style: TextStyle(color: Colors.grey[400]),
@@ -417,10 +573,10 @@ class _WallPostState extends State<WallPost> {
 
                       // Display the menue
                       PopupMenuButton(
+                        color: Colors.white,
                         icon: Icon(Icons.more_vert, color: Colors.grey[500]),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              10.0), // Adjust the radius as needed
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
                         itemBuilder: (_) => <PopupMenuItem<String>>[
                           PopupMenuItem<String>(
@@ -428,10 +584,7 @@ class _WallPostState extends State<WallPost> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Icon(
-                                  Icons.flag_outlined,
-                                  color: Colors.black,
-                                ),
+                                Icon(Icons.flag_outlined, color: Colors.black),
                                 SizedBox(width: 5),
                                 Text(
                                   "Report",
@@ -446,13 +599,27 @@ class _WallPostState extends State<WallPost> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(
-                                    Icons.delete_outlined,
-                                    color: Colors.black,
-                                  ),
+                                  Icon(Icons.delete_outlined,
+                                      color: Colors.black),
                                   SizedBox(width: 5),
                                   Text(
                                     "Delete",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (isAdminState == true)
+                            PopupMenuItem<String>(
+                              value: 'add_context',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.lens_outlined,
+                                      color: Colors.black),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "Add Context",
                                     style: TextStyle(color: Colors.black),
                                   ),
                                 ],
@@ -463,6 +630,9 @@ class _WallPostState extends State<WallPost> {
                           switch (index) {
                             case 'report':
                               showReportDialog();
+                              break;
+                            case 'add_context':
+                              showContextDialog();
                               break;
                             case 'delete':
                               deletePost();
@@ -481,7 +651,7 @@ class _WallPostState extends State<WallPost> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // LIKE
-              Column(
+              Row(
                 children: [
                   // Like Button
                   LikeButton(
@@ -489,7 +659,7 @@ class _WallPostState extends State<WallPost> {
                     onTap: toggleLike,
                   ),
 
-                  const SizedBox(height: 5),
+                  const SizedBox(width: 10),
 
                   // like count
                   Text(widget.likes.length.toString(),
@@ -501,89 +671,194 @@ class _WallPostState extends State<WallPost> {
               const SizedBox(width: 20),
 
               // COMMENT
-              Column(
+              Row(
                 children: [
                   // Like Button
                   CommentButton(
-                    onTap: showCommentDialog,
+                    onTap: showComments,
                   ),
 
-                  const SizedBox(height: 5),
+                  const SizedBox(width: 10),
+                  // view count
+                  Text("$commentNumber", style: TextStyle(color: Colors.grey)),
 
                   // like count
-                  Text(('0'), style: TextStyle(color: Colors.grey)),
+                  //Text(widget.comments.length.toString(),
+                  //    style: TextStyle(color: Colors.grey)),
 
                   // Like Count
                 ],
               ),
               const SizedBox(width: 20),
+
+              // VIEW COUNT
+              Row(
+                children: [
+                  // Like Button
+                  Icon(Icons.bar_chart_rounded, color: Colors.grey[500]),
+
+                  SizedBox(width: 10),
+
+                  // view count
+                  Text(widget.views.length.toString(),
+                      style: TextStyle(color: Colors.grey)),
+
+                  // Like Count
+                ],
+              ),
+
+              const SizedBox(width: 20),
+
               // delete button
 
               if (widget.user == usernameState) DeleteButton(onTap: deletePost)
             ],
           ),
+          AnimatedSwitcher(
+            duration: Duration(milliseconds: 150),
+            child: isCommentDialogOpen
+                ? StreamBuilder<QuerySnapshot>(
+                    key: ValueKey<bool>(
+                        true), // Add a unique key for the first StreamBuilder
+                    stream: FirebaseFirestore.instance
+                        .collection("Posts")
+                        .doc(widget.postId)
+                        .collection("Comments")
+                        .orderBy("CommentTime", descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      // Show loading circle if no data yet
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                          ),
+                        );
+                      }
 
-          // comments under the post
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection("Posts")
-                .doc(widget.postId)
-                .collection("Comments")
-                .orderBy("CommentTime", descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              // show loading circle if no data yet
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                );
-              }
+                      // Conditional SizedBox to show only if there are comments
+                      final hasComments = snapshot.data!.docs.isNotEmpty;
 
-              // Conditional SizedBox to show only if there are comments
-              final hasComments = snapshot.data!.docs.isNotEmpty;
+                      return Column(
+                        children: [
+                          if (hasComments)
+                            SizedBox(height: 20)
+                          else
+                            SizedBox(height: 5),
+                          if (mediaUrl != null) SizedBox(height: 5),
 
-              return Column(
-                children: [
-                  if (hasComments)
-                    SizedBox(height: 20)
-                  else
-                    SizedBox(height: 5),
-                  if (mediaUrl != null) SizedBox(height: 5),
+                          // Post comment
+                          Padding(
+                            padding: const EdgeInsets.all(0.0),
+                            child: Row(
+                              children: [
+                                // Textfield
+                                Expanded(
+                                  child: MyTextField(
+                                    controller: commentTextController,
+                                    hintText: "Post a comment...",
+                                    obscureText: false,
+                                  ),
+                                ),
 
-                  // Rest of your code
-                  ListView(
-                    shrinkWrap: true, // for nested lists
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: snapshot.data!.docs.map((doc) {
-                      // get the comment
-                      final commentData = doc.data() as Map<String, dynamic>;
+                                // Post button
+                                IconButton(
+                                  onPressed: postComment,
+                                  icon: Icon(Icons.arrow_circle_up),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 20),
 
-                      // return the comment
-                      return Comment(
-                        text: commentData["CommentText"],
-                        user: commentData["CommentedBy"],
-                        usernameState: commentData["CommentedBy"],
-                        time: formatDate(commentData["CommentTime"]),
+                          // Rest of your code
+                          ListView(
+                            shrinkWrap: true, // For nested lists
+                            physics: NeverScrollableScrollPhysics(),
+                            children: snapshot.data!.docs.map((doc) {
+                              // Get the comment
+                              final commentData =
+                                  doc.data() as Map<String, dynamic>;
+
+                              // Return the comment
+                              return Comment(
+                                text: commentData["CommentText"],
+                                user: commentData["CommentedBy"],
+                                usernameState: commentData["CommentedBy"],
+                                time: formatDate(commentData["CommentTime"]),
+                                postId: widget.postId,
+                                commentId: doc
+                                    .id, // Pass the comment document ID as commentId
+                              );
+                            }).toList(),
+                          )
+                        ],
                       );
-                    }).toList(),
-                  ),
-                ],
-              );
-            },
-          ),
+                    },
+                  )
+                : StreamBuilder<QuerySnapshot>(
+                    key: ValueKey<bool>(
+                        false), // Add a unique key for the second StreamBuilder
+                    stream: FirebaseFirestore.instance
+                        .collection("Posts")
+                        .doc(widget.postId)
+                        .collection("Comments")
+                        .orderBy("Views", descending: false)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      // Show loading circle if no data yet
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                          ),
+                        );
+                      }
 
-          // Display the User Email for admins
-          //if (isAdminState == true)
-          //  Text(
-          //    widget.userEmail, // Display the username here
-          //   style: TextStyle(
-          //      color: Colors.grey[400],
-          //      fontSize: 16, // Set an appropriate font size
-          //      fontWeight: FontWeight.bold, // You can adjust the style
-          //    ),
-          //  ),
+                      final comments = snapshot.data!.docs.map((doc) {
+                        // Get the comment
+                        final commentData = doc.data() as Map<String, dynamic>;
+
+                        // Return the comment
+                        return Comment(
+                          text: commentData["CommentText"],
+                          user: commentData["CommentedBy"],
+                          usernameState: commentData["CommentedBy"],
+                          time: formatDate(commentData["CommentTime"]),
+                          postId: widget.postId,
+                          commentId: doc.id,
+                        );
+                      }).toList();
+
+                      return Column(
+                        children: [
+                          if (comments.isNotEmpty)
+                            SizedBox(height: 20)
+                          else
+                            SizedBox(height: 5),
+                          if (mediaUrl != null) SizedBox(height: 5),
+
+                          // Display only the latest 3 comments
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount:
+                                comments.length >= 3 ? 3 : comments.length,
+                            itemBuilder: (context, index) {
+                              return comments[index];
+                            },
+                          ),
+
+                          if (widget.contextText != "") SizedBox(height: 5),
+                          if (widget.contextText != "")
+                            ComunityContext(text: widget.contextText)
+                        ],
+                      );
+                    },
+                  ),
+          ),
         ],
       ),
     );

@@ -30,7 +30,7 @@ class MyPostField extends StatelessWidget {
           obscureText: obscureText,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
-              // borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8.0),
               borderSide:
                   BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),
@@ -48,7 +48,8 @@ class MyPostField extends StatelessWidget {
         // Display the menue
 
         PopupMenuButton(
-          icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+          icon: Icon(Icons.add_rounded, color: Colors.grey[500]),
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(10.0), // Adjust the radius as needed

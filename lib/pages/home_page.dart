@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, depend_on_referenced_packages, library_prefixes
 
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:nexus/components/post_field.dart';
 import 'package:nexus/pages/settings_page.dart';
@@ -71,14 +72,14 @@ class _HomePageState extends State<HomePage> {
       var username = userData['username'];
       var isAdmin = userData['admin'];
       var email = userData['email'];
-      var user_Id = userData['userId'];
+      // var user_Id = userData['userId'];
 
       setState(() {
         // Update isAdmin and username in the state
         usernameState = username;
         isAdminState = isAdmin;
         emailState = email;
-        user_Id = userId;
+        // user_Id = userId;
       });
     } else {
       //print("User data not found");
@@ -148,7 +149,9 @@ class _HomePageState extends State<HomePage> {
         'isAdminPost': isAdminState,
         'TimeStamp': Timestamp.now(),
         'MediaDestination': fileName != null ? 'media/$fileName' : '',
+        'Context': "",
         'Likes': [],
+        'Views': [],
       });
       textController.clear();
 
@@ -219,22 +222,37 @@ class _HomePageState extends State<HomePage> {
     Firebase.initializeApp();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: Text(
-          "N E X U S",
-          selectionColor: Theme.of(context).colorScheme.primary,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: Size(
+          double.infinity,
+          56.0,
         ),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
-        elevation: 0,
-        actions: [
-          // sign out button
-          IconButton(
-            onPressed: signOut,
-            icon: Icon(Icons.logout),
-            color: Theme.of(context).colorScheme.tertiary,
-          )
-        ],
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+            child: AppBar(
+              title: Text(
+                "N E X U S",
+                selectionColor: Theme.of(context).colorScheme.primary,
+              ),
+              centerTitle: true,
+
+              elevation: 0.0,
+              // backgroundColor: Colors.black.withOpacity(0.2),
+              backgroundColor:
+                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+              actions: [
+                // sign out button
+                IconButton(
+                  onPressed: signOut,
+                  icon: Icon(Icons.logout),
+                  color: Theme.of(context).colorScheme.tertiary,
+                )
+              ],
+            ),
+          ),
+        ),
       ),
       drawer: MyDrawer(
         onSearchTap: goToSearchPage,
@@ -274,8 +292,12 @@ class _HomePageState extends State<HomePage> {
                           userEmail: post['UserEmail'],
                           isAdminPost: post['isAdminPost'],
                           mediaDest: post['MediaDestination'],
+                          contextText: post['Context'],
                           postId: post.id,
                           likes: List<String>.from(post['Likes'] ?? []),
+                          views: List<String>.from(post['Views'] ?? []),
+                          /*comments:
+                              List<String>.from(post['CommentCount'] ?? []),*/
                           time: formatDate(post['TimeStamp']),
                         );
                       },

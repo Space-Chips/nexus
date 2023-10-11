@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:nexus/components/my_list_tile.dart';
 
@@ -24,69 +26,74 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      backgroundColor: Colors.grey[900],
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+        child: Drawer(
+          backgroundColor: Colors.grey[900]?.withOpacity(0.1),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              DrawerHeader(
-                child: Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 64,
-                ),
+              Column(
+                children: [
+                  DrawerHeader(
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 64,
+                    ),
+                  ),
+
+                  // home list tile
+                  MyListTile(
+                    icon: Icons.home_rounded,
+                    text: 'H O M E',
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  // profile sarch list tile
+                  MyListTile(
+                    icon: Icons.search_outlined,
+                    text: 'S E A R C H',
+                    onTap: onSearchTap,
+                  ),
+
+                  // profile list tile
+                  MyListTile(
+                    icon: Icons.person_rounded,
+                    text: 'P R O F I L E',
+                    onTap: onProfileTap,
+                  ),
+                  MyListTile(
+                    icon: Icons.bedtime_rounded,
+                    text: 'T H E M E',
+                    onTap: onThemeTap,
+                  ),
+                  MyListTile(
+                    icon: Icons.chat,
+                    text: 'L I V E  C H A T',
+                    onTap: onLiveChatTap,
+                  ),
+                  if (isAdmin == true)
+                    MyListTile(
+                      icon: Icons.shield_rounded,
+                      text: 'A D M I N  C H A T',
+                      onTap: onAdminChatTap,
+                    ),
+                ],
               ),
 
-              // home list tile
-              MyListTile(
-                icon: Icons.home,
-                text: 'H O M E',
-                onTap: () => Navigator.pop(context),
-              ),
-              // profile sarch list tile
-              MyListTile(
-                icon: Icons.search_outlined,
-                text: 'S E A R C H',
-                onTap: onSearchTap,
-              ),
-
-              // profile list tile
-              MyListTile(
-                icon: Icons.person,
-                text: 'P R O F I L E',
-                onTap: onProfileTap,
-              ),
-              MyListTile(
-                icon: Icons.bedtime,
-                text: 'T H E M E',
-                onTap: onThemeTap,
-              ),
-              MyListTile(
-                icon: Icons.chat,
-                text: 'L I V E  C H A T',
-                onTap: onLiveChatTap,
-              ),
-              if (isAdmin == true)
-                MyListTile(
-                  icon: Icons.shield_rounded,
-                  text: 'A D M I N  C H A T',
-                  onTap: onAdminChatTap,
+              // logout list tile
+              Padding(
+                padding: const EdgeInsets.only(bottom: 25.0),
+                child: MyListTile(
+                  icon: Icons.logout_rounded,
+                  text: 'L O G O U T',
+                  onTap: onSignOut,
                 ),
+              ),
             ],
           ),
-
-          // logout list tile
-          Padding(
-            padding: const EdgeInsets.only(bottom: 25.0),
-            child: MyListTile(
-              icon: Icons.logout,
-              text: 'L O G O U T',
-              onTap: onSignOut,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

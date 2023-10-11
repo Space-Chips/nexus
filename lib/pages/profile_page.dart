@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:nexus/components/chat_post.dart';
 import 'package:nexus/components/text_box.dart';
 import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String username;
@@ -24,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late String address;
   late String website;
   late bool admin;
-  late String updatedValue; // Declare updatedValue as a class-level variable
+  late String updatedValue;
 
   // user
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -54,6 +56,20 @@ class _ProfilePageState extends State<ProfilePage> {
     } else {
       // Handle the case where no user is found.
     }
+  }
+
+  // navigate to Home page
+  void goToHomePage() {
+    // pop menu drawer
+    Navigator.pop(context);
+
+    // go to profile page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
+    );
   }
 
   // Define the displayMessage method
@@ -111,11 +127,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
-        title: Text(widget.username),
-        elevation: 0,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: Size(
+          double.infinity,
+          56.0,
+        ),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: AppBar(
+              title: Text(widget.username),
+              centerTitle: true,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  goToHomePage();
+                },
+              ),
+              elevation: 0.0,
+              // backgroundColor: Colors.black.withOpacity(0.2),
+              backgroundColor:
+                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<QuerySnapshot>(
           future: docRef,
@@ -129,7 +165,6 @@ class _ProfilePageState extends State<ProfilePage> {
             }
 
             var userDocument = snapshot.data!.docs[0];
-
             username = userDocument['username'];
             address = userDocument['address'];
             website = userDocument['website'];
@@ -137,120 +172,164 @@ class _ProfilePageState extends State<ProfilePage> {
 
             return ListView(
               children: [
-                const SizedBox(height: 25),
-                Icon(
-                  Icons.person,
-                  size: 72,
-                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      //const SizedBox(height: 25),
+                      /*Icon(
+                          Icons.person,
+                          size: 72,
+                        ),*/
 
-                const SizedBox(height: 25),
-                Text(
-                  widget.username,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the Row horizontally
-                  children: [
-                    if (address != "")
-                      Icon(
-                        Icons.location_pin,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                    if (address != "")
-                      Text(
-                        userDocument['address'],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    if (address != "") SizedBox(width: 20),
-                    Icon(
-                      Icons.calendar_month_rounded,
-                      color: Colors.grey[700],
-                      size: 20,
-                    ),
-                    Text(
-                      "Joined ${formatDate(userDocument['joinDate'])}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    if (website != "")
-                      Icon(
-                        Icons.link_outlined,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                    if (website != "")
-                      Text(
-                        website,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    if (admin == true) SizedBox(width: 20),
-                    if (admin == true)
-                      Icon(
-                        Icons.shield_outlined,
-                        color: Colors.grey[700],
-                        size: 20,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the Row horizontally
-                  children: [
-                    Text(userDocument['followers'].length.toString(),
-                        style: TextStyle(color: Colors.grey[700])),
-                    const SizedBox(width: 10),
-                    Text(
-                      userDocument['followers'].length == 1
-                          ? 'follower'
-                          : 'followers', // Replace 'Other Text' with what you want to display when followers' length is not 1
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-
-                    /*Text(
-                      userDocument['followers'],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),*/
-
-                    const SizedBox(width: 10),
-                    TextButton(
-                      onPressed: () {
-                        toggleFollowing();
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            isFollowing ? Colors.white : Colors.blue),
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          EdgeInsets.symmetric(
-                              vertical:
-                                  5, // Adjust the vertical padding as needed
-                              horizontal:
-                                  10), // Adjust the horizontal padding as needed
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                          color: Colors.grey[100],
                         ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                        child: SizedBox(
+                          width: 100.0,
+                          height: 100.0,
+                          child: SizedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.all(3.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(22.0),
+                                  color:
+                                      Theme.of(context).colorScheme.background,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    username[0].toUpperCase(),
+                                    style: TextStyle(
+                                        fontSize: 50,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .tertiary),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      child: Text(
-                        isFollowing ? "Following" : "Follow",
-                        style: TextStyle(
-                          color: isFollowing ? Colors.black : Colors.white,
-                          fontSize: 13,
-                        ),
+
+                      const SizedBox(height: 25),
+
+                      Text(
+                        widget.username,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey[700], fontSize: 13),
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (address != "")
+                            Icon(
+                              Icons.location_pin,
+                              color: Colors.grey[700],
+                              size: 20,
+                            ),
+                          if (address != "")
+                            Text(
+                              userDocument['address'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),
+                          if (address != "") SizedBox(width: 20),
+                          Icon(
+                            Icons.calendar_month_rounded,
+                            color: Colors.grey[700],
+                            size: 20,
+                          ),
+                          Text(
+                            "Joined ${formatDate(userDocument['joinDate'])}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
+                          if (website != "")
+                            Icon(
+                              Icons.link_outlined,
+                              color: Colors.grey[700],
+                              size: 20,
+                            ),
+                          if (website != "")
+                            Text(
+                              website,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                          if (admin == true) SizedBox(width: 20),
+                          if (admin == true)
+                            Icon(
+                              Icons.shield_outlined,
+                              color: Colors.grey[700],
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Center the Row horizontally
+                        children: [
+                          Text(userDocument['followers'].length.toString(),
+                              style: TextStyle(color: Colors.grey[700])),
+                          const SizedBox(width: 10),
+                          Text(
+                            userDocument['followers'].length == 1
+                                ? 'follower'
+                                : 'followers', // Replace 'Other Text' with what you want to display when followers' length is not 1
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
+
+                          /*Text(
+                              userDocument['followers'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),*/
+
+                          const SizedBox(width: 10),
+                          TextButton(
+                            onPressed: () {
+                              toggleFollowing();
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  isFollowing ? Colors.white : Colors.blue),
+                              padding:
+                                  MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                EdgeInsets.symmetric(
+                                    vertical:
+                                        5, // Adjust the vertical padding as needed
+                                    horizontal:
+                                        10), // Adjust the horizontal padding as needed
+                              ),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              isFollowing ? "Following" : "Follow",
+                              style: TextStyle(
+                                color:
+                                    isFollowing ? Colors.black : Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
                 /* Padding(
@@ -347,16 +426,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             itemBuilder: (context, index) {
                               final post = snapshot.data!.docs[index];
                               return WallPost(
-                                message: post['Message'] ?? '',
-                                user: post['User'] ?? '',
-                                userEmail: post['UserEmail'] ?? '',
-                                isAdminPost: post['isAdminPost'] ?? false,
-                                mediaDest: post['MediaDestination'] ?? '',
+                                message: post['Message'],
+                                user: post['User'],
+                                userEmail: post['UserEmail'],
+                                isAdminPost: post['isAdminPost'],
+                                mediaDest: post['MediaDestination'],
+                                contextText: post['Context'],
                                 postId: post.id,
                                 likes: List<String>.from(post['Likes'] ?? []),
-                                time: formatDate(post['TimeStamp'] ??
-                                    DateTime
-                                        .now()), // Update with post timestamp
+                                views: List<String>.from(post['Views'] ?? []),
+                                /*comments: List<String>.from(
+                                    post['CommentCount'] ?? []),*/
+                                time: formatDate(post['TimeStamp']),
                               );
                             },
                           );
