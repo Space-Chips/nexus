@@ -1,32 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ComunityContext extends StatefulWidget {
+class CommunityContext extends StatefulWidget {
   final String text;
 
-  const ComunityContext({
-    Key? key,
-    required this.text,
-  }) : super(key: key);
+  const CommunityContext({Key? key, required this.text}) : super(key: key);
 
   @override
-  State<ComunityContext> createState() => _ComunityContextState();
+  _CommunityContextState createState() => _CommunityContextState();
 }
 
-class _ComunityContextState extends State<ComunityContext> {
-  bool isLiked = false;
-  bool isAdminState = false;
-  String usernameState = "usernameState";
-  String userEmail = "userEmail";
-  String postUsername = "Test Username";
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class _CommunityContextState extends State<CommunityContext> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,30 +25,54 @@ class _ComunityContextState extends State<ComunityContext> {
       padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // const Icon(Icons.search_rounded),
-          const Text("Context you might want to know"),
-
+        children: <Widget>[
+          _buildTitle(),
           const SizedBox(height: 5),
           Divider(
             thickness: 0.5,
             color: Colors.grey[400],
           ),
           const SizedBox(height: 5),
-
           Text(widget.text),
-
-          // user, time
-          Row(
-            children: [
-              Text(
-                "admins",
-                style: TextStyle(color: Colors.grey[400]),
-              ),
-            ],
-          ),
+          _buildAdditionalInfo(),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitle() {
+    return Row(
+      children: [
+        Icon(
+          Icons.group,
+          size: 22,
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        const SizedBox(width: 7),
+        const Text(
+          "Context you might want to know",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdditionalInfo() {
+    return Column(
+      children: [
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Text(
+              "Send on Earth",
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+            // Add more widgets to display other information if needed.
+          ],
+        ),
+      ],
     );
   }
 }

@@ -615,11 +615,10 @@ class _WallPostState extends State<WallPost> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(Icons.lens_outlined,
-                                      color: Colors.black),
+                                  Icon(Icons.group, color: Colors.black),
                                   SizedBox(width: 5),
                                   Text(
-                                    "Add Context",
+                                    "Note",
                                     style: TextStyle(color: Colors.black),
                                   ),
                                 ],
@@ -850,10 +849,10 @@ class _WallPostState extends State<WallPost> {
                               return comments[index];
                             },
                           ),
-
-                          if (widget.contextText != "") SizedBox(height: 5),
+                          if (widget.contextText != "" && comments.isEmpty)
+                            SizedBox(height: 20),
                           if (widget.contextText != "")
-                            ComunityContext(text: widget.contextText)
+                            CommunityContext(text: widget.contextText)
                         ],
                       );
                     },
