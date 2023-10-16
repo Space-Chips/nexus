@@ -217,6 +217,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  double calculatePostScore(DocumentSnapshot post) {
+    int likesCount = (post['Likes'] as List).length;
+    int viewsCount = (post['Views'] as List).length;
+
+    // Define your scoring formula based on your specific requirements
+    double score = likesCount * 0.6 + viewsCount * 0.4;
+
+    return score;
+  }
+
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
@@ -274,18 +284,23 @@ class _HomePageState extends State<HomePage> {
               child: StreamBuilder(
                 stream: FirebaseFirestore.instance
                     .collection('Posts')
-                    .orderBy(
-                      "TimeStamp",
-                      descending: true,
-                    )
+                    .orderBy('TimeStamp', descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
+                    List<QueryDocumentSnapshot> posts = snapshot.data!.docs;
+
+                    // Sort the posts based on their scores
+                    /*posts.sort((a, b) {
+                      double scoreA = calculatePostScore(a);
+                      double scoreB = calculatePostScore(b);
+                      return scoreB.compareTo(scoreA);
+                    });*/
+
                     return ListView.builder(
-                      itemCount: snapshot.data!.docs.length,
+                      itemCount: posts.length,
                       itemBuilder: (context, index) {
-                        // get messages
-                        final post = snapshot.data!.docs[index];
+                        final post = posts[index];
                         return WallPost(
                           message: post['Message'],
                           user: post['User'],
@@ -296,8 +311,6 @@ class _HomePageState extends State<HomePage> {
                           postId: post.id,
                           likes: List<String>.from(post['Likes'] ?? []),
                           views: List<String>.from(post['Views'] ?? []),
-                          /*comments:
-                              List<String>.from(post['CommentCount'] ?? []),*/
                           time: formatDate(post['TimeStamp']),
                         );
                       },

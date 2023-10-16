@@ -505,15 +505,21 @@ class _WallPostState extends State<WallPost> {
         children: [
           if (widget.mediaDest != "")
             Center(
-              child: SizedBox(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: CachedNetworkImage(
-                    imageUrl: mediaUrl,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.error,
-                      color: Colors.grey[600],
+              child: GestureDetector(
+                onTap: () {
+                  openFullScreenPage();
+                },
+                child: SizedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: CachedNetworkImage(
+                      imageUrl: mediaUrl,
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ),
                 ),

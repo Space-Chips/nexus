@@ -13,9 +13,9 @@ import 'package:nexus/pages/home_page.dart';
 class ProfilePage extends StatefulWidget {
   final String username;
   const ProfilePage({
-    super.key,
+    Key? key,
     required this.username,
-  });
+  }) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -28,9 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
   late bool admin;
   late String updatedValue;
 
-  // user
+  // User
   final currentUser = FirebaseAuth.instance.currentUser!;
-
   bool showPosts = true;
   bool isFollowing = false;
 
@@ -58,12 +57,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // navigate to Home page
+  // Navigate to Home page
   void goToHomePage() {
-    // pop menu drawer
+    // Pop the menu drawer
     Navigator.pop(context);
 
-    // go to profile page
+    // Go to the profile page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -93,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // toggle following
+  // Toggle following
   void toggleFollowing() async {
     setState(() {
       isFollowing = !isFollowing;
@@ -127,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,
@@ -146,7 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
               elevation: 0.0,
-              // backgroundColor: Colors.black.withOpacity(0.2),
               backgroundColor:
                   Theme.of(context).colorScheme.background.withOpacity(0.2),
             ),
@@ -154,34 +152,29 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       body: FutureBuilder<QuerySnapshot>(
-          future: docRef,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.size == 0) {
-              return Center(child: Text('No matching user found.'));
-            }
+        future: docRef,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.size == 0) {
+            return Center(child: Text('No matching user found.'));
+          }
 
-            var userDocument = snapshot.data!.docs[0];
-            username = userDocument['username'];
-            address = userDocument['address'];
-            website = userDocument['website'];
-            admin = userDocument['admin'];
+          var userDocument = snapshot.data!.docs[0];
+          username = userDocument['username'];
+          address = userDocument['address'];
+          website = userDocument['website'];
+          admin = userDocument['admin'];
 
-            return ListView(
-              children: [
-                Padding(
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      //const SizedBox(height: 25),
-                      /*Icon(
-                          Icons.person,
-                          size: 72,
-                        ),*/
-
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25.0),
@@ -203,11 +196,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   child: Text(
                                     username[0].toUpperCase(),
                                     style: TextStyle(
-                                        fontSize: 50,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .tertiary),
+                                      fontSize: 50,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiary,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -215,15 +209,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
-
                       Text(
                         widget.username,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey[700], fontSize: 13),
                       ),
-
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -274,26 +265,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 10),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Center the Row horizontally
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(userDocument['followers'].length.toString(),
-                              style: TextStyle(color: Colors.grey[700])),
+                          Text(
+                            userDocument['followers'].length.toString(),
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             userDocument['followers'].length == 1
                                 ? 'follower'
-                                : 'followers', // Replace 'Other Text' with what you want to display when followers' length is not 1
+                                : 'followers',
                             textAlign: TextAlign.center,
                             style: TextStyle(color: Colors.grey[700]),
                           ),
-
-                          /*Text(
-                              userDocument['followers'],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey[700]),
-                            ),*/
-
                           const SizedBox(width: 10),
                           TextButton(
                             onPressed: () {
@@ -301,14 +286,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
-                                  isFollowing ? Colors.white : Colors.blue),
+                                isFollowing ? Colors.white : Colors.blue,
+                              ),
                               padding:
                                   MaterialStateProperty.all<EdgeInsetsGeometry>(
                                 EdgeInsets.symmetric(
-                                    vertical:
-                                        5, // Adjust the vertical padding as needed
-                                    horizontal:
-                                        10), // Adjust the horizontal padding as needed
+                                  vertical: 5,
+                                  horizontal: 10,
+                                ),
                               ),
                               shape: MaterialStateProperty.all<
                                   RoundedRectangleBorder>(
@@ -331,29 +316,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-
-                /* Padding(
-                  padding: const EdgeInsets.only(left: 25.0),
-                  child: Text(
-                    'Details',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ),*/
-
-                //MyTextBox(
-                //  text: username, // Now you can use the username variable here
-                //  sectionName: 'username',
-                //),
-                MyTextBox(
+              ),
+              SliverToBoxAdapter(
+                child: MyTextBox(
                   text: userDocument['bio'],
                   sectionName: 'bio',
                 ),
-
-                const SizedBox(height: 20),
-
-                Padding(
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              SliverToBoxAdapter(
+                child: Padding(
                   padding: const EdgeInsets.only(left: 25.0),
                   child: Row(
                     children: [
@@ -392,38 +364,36 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-                showPosts
-                    ? StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection("Posts")
-                            .where('User', isEqualTo: widget.username)
-                            .orderBy("TimeStamp", descending: true)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          }
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return Align(
-                              alignment: Alignment.center,
-                              child: Center(
-                                child: Text('No posts found.'),
-                              ),
-                            );
-                          }
+              ),
+              showPosts
+                  ? StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("Posts")
+                          .where('User', isEqualTo: widget.username)
+                          .orderBy("TimeStamp", descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SliverToBoxAdapter(
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return SliverToBoxAdapter(
+                            child:
+                                Center(child: Text('Error: ${snapshot.error}')),
+                          );
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return SliverToBoxAdapter(
+                            child: Center(child: Text('No posts found.')),
+                          );
+                        }
 
-                          // Display the posts in a ListView
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index) {
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
                               final post = snapshot.data!.docs[index];
                               return WallPost(
                                 message: post['Message'],
@@ -435,43 +405,43 @@ class _ProfilePageState extends State<ProfilePage> {
                                 postId: post.id,
                                 likes: List<String>.from(post['Likes'] ?? []),
                                 views: List<String>.from(post['Views'] ?? []),
-                                /*comments: List<String>.from(
-                                    post['CommentCount'] ?? []),*/
                                 time: formatDate(post['TimeStamp']),
                               );
                             },
+                            childCount: snapshot.data!.docs.length,
+                          ),
+                        );
+                      },
+                    )
+                  : StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("Chat")
+                          .where('User', isEqualTo: widget.username)
+                          .orderBy("TimeStamp", descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SliverToBoxAdapter(
+                            child: Center(child: CircularProgressIndicator()),
                           );
-                        },
-                      )
-                    : StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection("Chat")
-                            .where('User', isEqualTo: widget.username)
-                            .orderBy("TimeStamp", descending: true)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          }
+                        }
+                        if (snapshot.hasError) {
+                          return SliverToBoxAdapter(
+                            child:
+                                Center(child: Text('Error: ${snapshot.error}')),
+                          );
+                        }
 
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return Center(
-                              child: Text('No chats found.'),
-                            );
-                          }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return SliverToBoxAdapter(
+                            child: Center(child: Text('No chats found.')),
+                          );
+                        }
 
-                          // Display the posts in a ListView
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index) {
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
                               final post = snapshot.data!.docs[index];
                               return ChatPosts(
                                 message: post['Message'] ?? '',
@@ -480,17 +450,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 isAdminPost: post['isAdminPost'] ?? false,
                                 postId: post.id,
                                 likes: List<String>.from(post['Likes'] ?? []),
-                                time: formatDate(post['TimeStamp'] ??
-                                    DateTime
-                                        .now()), // Update with post timestamp
+                                time: formatDate(
+                                    post['TimeStamp'] ?? DateTime.now()),
                               );
                             },
-                          );
-                        },
-                      ),
-              ],
-            );
-          }),
+                            childCount: snapshot.data!.docs.length,
+                          ),
+                        );
+                      },
+                    ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
