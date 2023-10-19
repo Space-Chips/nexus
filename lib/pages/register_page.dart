@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_const, prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, depend_on_referenced_packages, use_build_context_synchronously
+// ignore_for_file: unnecessary_const, prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, depend_on_referenced_packages, use_build_context_synchronously, unnecessary_null_comparison
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,6 +43,28 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  Future<void> checkSignUp() async {
+    print("launched");
+    int? age;
+    if (ageTextController.text.isNotEmpty) {
+      age = int.tryParse(ageTextController.text);
+    }
+
+    if (age == null) {
+      // Handle invalid input, e.g., when the input is not a valid integer.
+      displayMessage("Please enter a valid age.");
+    } else {
+      if (age >= 116) {
+        displayMessage("No, you're not the oldest person alive.");
+      } else if (age == 69) {
+        displayMessage("69... Seriously?");
+        signUp();
+      } else {
+        signUp();
+      }
+    }
+  }
+
   Future signUp() async {
     Future addUsersDetails(String firstName, String lastName, String password,
         String email, int age) async {
@@ -70,16 +92,16 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     // show loading circle
-    showDialog(
+    /*showDialog(
       context: context,
       builder: (context) => const Center(
         child: CircularProgressIndicator(),
       ),
-    );
+    );*/
 
     if (passwordTextController.text != confirmpasswordTextController.text) {
       // pop loading circle
-      Navigator.pop(context);
+      //Navigator.pop(context);
       // show error to the user
       displayMessage("Passwords don't match");
       return;
@@ -102,8 +124,8 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordTextController.text.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      //pop loading circle
-      Navigator.pop(context);
+      // pop loading circle
+      // Navigator.pop(context);
       // show error to user
       displayMessage(e.code);
     }
@@ -114,7 +136,12 @@ class _RegisterPageState extends State<RegisterPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(message),
+        title: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        backgroundColor: Colors.white.withOpacity(0.1),
       ),
     );
   }
@@ -209,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   // sign in button
                   MyButton(
-                    onTap: signUp,
+                    onTap: checkSignUp,
                     text: 'Sign Up',
                   ),
                   const SizedBox(height: 25),
