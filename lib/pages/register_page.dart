@@ -44,7 +44,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> checkSignUp() async {
-    print("launched");
     int? age;
     if (ageTextController.text.isNotEmpty) {
       age = int.tryParse(ageTextController.text);

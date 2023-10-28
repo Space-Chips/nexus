@@ -5,19 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nexus/components/comment.dart';
-import 'package:nexus/components/comment_button.dart';
-import 'package:nexus/components/community_notes.dart';
 import 'package:nexus/components/delete_button.dart';
-import 'package:nexus/components/text_field.dart';
-import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/full_image_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:nexus/pages/profile_page.dart';
 
-import 'like_button.dart';
+import '../like_button.dart';
 
-class WallPost extends StatefulWidget {
+class SubmitionWidget extends StatefulWidget {
   final String message;
   final String user;
   final String userEmail;
@@ -25,13 +20,15 @@ class WallPost extends StatefulWidget {
   final String postId;
   final String mediaDest;
   final String contextText;
+  final String category;
   final bool isAdminPost;
   final List<String> likes;
   final List<String> views;
   //final List<String> comments;
-  const WallPost({
+  const SubmitionWidget({
     super.key,
     required this.message,
+    required this.category,
     required this.user,
     required this.postId,
     required this.likes,
@@ -45,16 +42,17 @@ class WallPost extends StatefulWidget {
   });
 
   @override
-  State<WallPost> createState() => _WallPostState();
+  State<SubmitionWidget> createState() => _SubmitionWidgetState();
 }
 
-class _WallPostState extends State<WallPost> {
+class _SubmitionWidgetState extends State<SubmitionWidget> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   bool isAdminState = false;
   String usernameState = "usernameState";
   String userEmail = "userEmail";
   String postUsername = "Test Username";
+  String currentDocumentId = "";
   final commentTextController = TextEditingController();
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
@@ -69,12 +67,14 @@ class _WallPostState extends State<WallPost> {
   void initState() {
     super.initState();
     fetchUserData();
-    addView();
+    getId();
     getCommentNumber();
     //fetchIdData();
     if (widget.mediaDest.isNotEmpty) {
       getMediaUrl();
     }
+    addView();
+
     isLiked = widget.likes.contains(currentUser.email);
   }
 
@@ -82,13 +82,35 @@ class _WallPostState extends State<WallPost> {
   void dispose() {
     _isDisposed = true; // Set the flag when the widget is disposed
     super.dispose();
+    addView();
+    getId();
+  }
+
+  void getId() async {
+    addView();
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection("Challenge")
+        .where("name", isEqualTo: widget.category)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Loop through the query results
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        String documentId = doc.id;
+        setState(() {
+          currentDocumentId = documentId;
+        });
+      }
+    }
   }
 
   Future<void> getCommentNumber() async {
     var docs = await FirebaseFirestore.instance
-        .collection('Posts')
+        .collection('Challenge')
+        .doc(widget.category)
+        .collection('Submitions')
         .doc(widget.postId)
-        .collection('Comments')
+        .collection("Comments")
         .get();
     final int count = docs.size;
     setState(() {
@@ -139,13 +161,19 @@ class _WallPostState extends State<WallPost> {
   }
 
   // Add the user email to the view map
-  void addView() {
-    // Acces the document is Firebase
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('Posts').doc(widget.postId);
+  void addView() async {
+    // Access the document in Firebase
+    DocumentReference postRef = FirebaseFirestore.instance
+        .collection("Challenge")
+        .doc(currentDocumentId)
+        .collection("Submitions")
+        .doc(widget.postId);
 
+    // If the post is now liked, add the user's email to the 'Likes' field
     postRef.update({
       'Views': FieldValue.arrayUnion([currentUser.email])
+    }).catchError((error) {
+      print("Error adding like: $error");
     });
   }
 
@@ -189,35 +217,44 @@ class _WallPostState extends State<WallPost> {
   }*/
 
   // toggle like
-  void toggleLike() {
-    HapticFeedback.mediumImpact();
+  void toggleLike() async {
+    HapticFeedback.lightImpact();
+
     setState(() {
       isLiked = !isLiked;
     });
 
-    // Acces the document is Firebase
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('Posts').doc(widget.postId);
+    // Access the document in Firebase
+    DocumentReference postRef = FirebaseFirestore.instance
+        .collection("Challenge")
+        .doc(currentDocumentId)
+        .collection("Submitions")
+        .doc(widget.postId);
 
     if (isLiked) {
-      // if the post is now liked, and the user's email to the 'Likes' field
+      // If the post is now liked, add the user's email to the 'Likes' field
       postRef.update({
         'Likes': FieldValue.arrayUnion([currentUser.email])
+      }).catchError((error) {
+        print("Error adding like: $error");
       });
     } else {
-      // if the post is unliked, remove the user's email from the 'Likes' field
+      // If the post is unliked, remove the user's email from the 'Likes' field
       postRef.update({
         'Likes': FieldValue.arrayRemove([currentUser.email])
+      }).catchError((error) {
+        print("Error removing like: $error");
       });
     }
   }
 
   // add a comment
   void addComment(String commentText) {
-    HapticFeedback.lightImpact();
-
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('Posts').doc(widget.postId);
+    DocumentReference postRef = FirebaseFirestore.instance
+        .collection('Challenge')
+        .doc(widget.category)
+        .collection('Submitions')
+        .doc(widget.postId);
 
     postRef.update({
       'CommentNumber': FieldValue.arrayUnion([currentUser.email]),
@@ -225,7 +262,9 @@ class _WallPostState extends State<WallPost> {
 
     // write the comment  to firestore under the comments
     FirebaseFirestore.instance
-        .collection("Posts")
+        .collection('Challenge')
+        .doc(widget.category)
+        .collection('Submitions')
         .doc(widget.postId)
         .collection("Comments")
         .add({
@@ -238,8 +277,6 @@ class _WallPostState extends State<WallPost> {
 
   // post message
   void postReport(String postText) {
-    HapticFeedback.lightImpact();
-
     // store in firebase
     FirebaseFirestore.instance.collection("Admin_Chat").add(
       {
@@ -255,94 +292,16 @@ class _WallPostState extends State<WallPost> {
 
   // post context
   void postContext(String text) {
-    HapticFeedback.lightImpact();
-
     // store in firebase
 
-    FirebaseFirestore.instance.collection("Posts").doc(widget.postId).update({
+    FirebaseFirestore.instance
+        .collection('Challenge')
+        .doc(widget.category)
+        .collection('Submitions')
+        .doc(widget.postId)
+        .update({
       'Context': text,
     });
-  }
-
-  // show comments
-  void showComments() {
-    HapticFeedback.lightImpact();
-
-    if (isCommentDialogOpen == true) {
-      setState(() {
-        isCommentDialogOpen = false;
-      });
-    } else {
-      setState(() {
-        isCommentDialogOpen = true;
-      });
-    }
-  }
-
-  // post comment method
-  void postComment() {
-    HapticFeedback.mediumImpact();
-
-    if (commentTextController.text.isNotEmpty) {
-      // add comment
-      addComment(commentTextController.text);
-      // pop box
-      commentTextController.clear();
-    }
-  }
-
-  // show a dialog box for adding a comment
-  void showCommentDialog() {
-    HapticFeedback.lightImpact();
-
-    if (isCommentDialogOpen == true) {
-      setState(() {
-        isCommentDialogOpen = false;
-      });
-    } else {
-      setState(() {
-        isCommentDialogOpen = true;
-      });
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("A D D  C O M E N T"),
-        content: TextField(
-          controller: commentTextController,
-          decoration: InputDecoration(hintText: "Write a comment..."),
-        ),
-        actions: [
-          // save button
-          TextButton(
-            onPressed: () {
-              if (commentTextController.text.isNotEmpty) {
-                // add coment
-                addComment(commentTextController.text);
-                // pop box
-                commentTextController.clear();
-                Navigator.pop(context);
-              } else {
-                // pop box
-                commentTextController.clear();
-                Navigator.pop(context);
-              }
-            },
-            child: Text("P O S T"),
-          ),
-
-          // cancel button
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "C A N C E L",
-              selectionColor: Colors.blue,
-            ),
-          )
-        ],
-      ),
-    );
   }
 
   // send a report message
@@ -390,6 +349,8 @@ class _WallPostState extends State<WallPost> {
 
   // send a report message
   void showContextDialog() {
+    HapticFeedback.lightImpact();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -432,6 +393,8 @@ class _WallPostState extends State<WallPost> {
 
   // delete a post
   void deletePost() {
+    HapticFeedback.lightImpact();
+
     // show a dialog box asking for confirmation
     showDialog(
       context: context,
@@ -454,11 +417,9 @@ class _WallPostState extends State<WallPost> {
           // DELETE BUTTON
           TextButton(
               onPressed: () async {
-                HapticFeedback.heavyImpact();
-
                 // delete the comments from firesotre first
                 // (if you only delete the post, the comments will still  be stored in firestore)
-                final commentDocs = await FirebaseFirestore.instance
+                /*final commentDocs = await FirebaseFirestore.instance
                     .collection("Users")
                     .doc(widget.postId)
                     .collection("Comments")
@@ -471,11 +432,13 @@ class _WallPostState extends State<WallPost> {
                       .collection("Comments")
                       .doc(doc.id)
                       .delete();
-                }
+                }*/
 
                 // then delete the Post
                 FirebaseFirestore.instance
-                    .collection("Posts")
+                    .collection("Challenge")
+                    .doc(currentDocumentId)
+                    .collection("Submitions")
                     .doc(widget.postId)
                     .delete();
 
@@ -506,6 +469,8 @@ class _WallPostState extends State<WallPost> {
 
   @override
   Widget build(BuildContext context) {
+    addView();
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
@@ -524,20 +489,17 @@ class _WallPostState extends State<WallPost> {
                 },
                 child: SizedBox(
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CachedNetworkImage(
-                            imageUrl: mediaUrl,
-                            errorWidget: (context, url, error) => Icon(
-                              Icons.error,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                    borderRadius: BorderRadius.circular(15),
+                    child: CachedNetworkImage(
+                      imageUrl: mediaUrl,
+                      placeholder: (context, url) =>
                           CircularProgressIndicator(),
-                        ],
-                      )),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -565,8 +527,6 @@ class _WallPostState extends State<WallPost> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          HapticFeedback.mediumImpact();
-
                           goToProfilePage(widget.user);
                         },
                         child: Text(
@@ -693,27 +653,6 @@ class _WallPostState extends State<WallPost> {
               ),
               const SizedBox(width: 20),
 
-              // COMMENT
-              Row(
-                children: [
-                  // Comment Button
-                  CommentButton(
-                    onTap: showComments,
-                  ),
-
-                  const SizedBox(width: 10),
-                  // view count
-                  Text("$commentNumber", style: TextStyle(color: Colors.grey)),
-
-                  // like count
-                  //Text(widget.comments.length.toString(),
-                  //    style: TextStyle(color: Colors.grey)),
-
-                  // Like Count
-                ],
-              ),
-              const SizedBox(width: 20),
-
               // VIEW COUNT
               Row(
                 children: [
@@ -736,151 +675,6 @@ class _WallPostState extends State<WallPost> {
 
               if (widget.user == usernameState) DeleteButton(onTap: deletePost)
             ],
-          ),
-          AnimatedSwitcher(
-            duration: Duration(milliseconds: 150),
-            child: isCommentDialogOpen
-                ? StreamBuilder<QuerySnapshot>(
-                    key: ValueKey<bool>(
-                        true), // Add a unique key for the first StreamBuilder
-                    stream: FirebaseFirestore.instance
-                        .collection("Posts")
-                        .doc(widget.postId)
-                        .collection("Comments")
-                        .orderBy("CommentTime", descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      // Show loading circle if no data yet
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
-                          ),
-                        );
-                      }
-
-                      // Conditional SizedBox to show only if there are comments
-                      final hasComments = snapshot.data!.docs.isNotEmpty;
-
-                      return Column(
-                        children: [
-                          if (hasComments)
-                            SizedBox(height: 20)
-                          else
-                            SizedBox(height: 5),
-                          if (mediaUrl != null) SizedBox(height: 5),
-
-                          // Post comment
-                          Padding(
-                            padding: const EdgeInsets.all(0.0),
-                            child: Row(
-                              children: [
-                                // Textfield
-                                Expanded(
-                                  child: MyTextField(
-                                    controller: commentTextController,
-                                    hintText: "Post a comment...",
-                                    obscureText: false,
-                                  ),
-                                ),
-
-                                // Post button
-                                IconButton(
-                                  onPressed: postComment,
-                                  icon: Icon(Icons.arrow_circle_up),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20),
-
-                          // Rest of your code
-                          ListView(
-                            shrinkWrap: true, // For nested lists
-                            physics: NeverScrollableScrollPhysics(),
-                            children: snapshot.data!.docs.map((doc) {
-                              // Get the comment
-                              final commentData =
-                                  doc.data() as Map<String, dynamic>;
-
-                              // Return the comment
-                              return Comment(
-                                text: commentData["CommentText"],
-                                user: commentData["CommentedBy"],
-                                usernameState: commentData["CommentedBy"],
-                                time: formatDate(commentData["CommentTime"]),
-                                postId: widget.postId,
-                                commentId: doc
-                                    .id, // Pass the comment document ID as commentId
-                              );
-                            }).toList(),
-                          )
-                        ],
-                      );
-                    },
-                  )
-                : StreamBuilder<QuerySnapshot>(
-                    key: ValueKey<bool>(
-                        false), // Add a unique key for the second StreamBuilder
-                    stream: FirebaseFirestore.instance
-                        .collection("Posts")
-                        .doc(widget.postId)
-                        .collection("Comments")
-                        .orderBy("Views", descending: false)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      // Show loading circle if no data yet
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
-                          ),
-                        );
-                      }
-
-                      final comments = snapshot.data!.docs.map((doc) {
-                        // Get the comment
-                        final commentData = doc.data() as Map<String, dynamic>;
-
-                        // Return the comment
-                        return Comment(
-                          text: commentData["CommentText"],
-                          user: commentData["CommentedBy"],
-                          usernameState: commentData["CommentedBy"],
-                          time: formatDate(commentData["CommentTime"]),
-                          postId: widget.postId,
-                          commentId: doc.id,
-                        );
-                      }).toList();
-
-                      return Column(
-                        children: [
-                          if (comments.isNotEmpty)
-                            SizedBox(height: 20)
-                          else
-                            SizedBox(height: 5),
-                          if (mediaUrl != null) SizedBox(height: 5),
-
-                          // Display only the latest 3 comments
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount:
-                                comments.length >= 3 ? 3 : comments.length,
-                            itemBuilder: (context, index) {
-                              return comments[index];
-                            },
-                          ),
-                          if (widget.contextText != "" && comments.isEmpty)
-                            SizedBox(height: 20),
-                          if (widget.contextText != "")
-                            CommunityContext(text: widget.contextText)
-                        ],
-                      );
-                    },
-                  ),
           ),
         ],
       ),

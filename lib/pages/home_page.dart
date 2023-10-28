@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nexus/components/challenge_components/challenge_widget.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:nexus/components/drawer.dart';
@@ -18,7 +19,9 @@ import 'package:nexus/pages/settings_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key});
+  const HomePage({
+    super.key,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -35,18 +38,94 @@ class _HomePageState extends State<HomePage> {
       "Test Username (please contact me on play store in case you see this)";
   String emailState = "Test user Email";
   String userId = "Test user Id";
+  int subcollectionCount = 0;
   List<QueryDocumentSnapshot> allPosts = [];
+
+  late String photoTitle = "Initialisation Error";
+  late String photo = "Initialisation Error";
+  late Timestamp photoTime = Timestamp.now();
+  late String gamingTitle = "Initialisation Error";
+  late String gaming = "Initialisation Error";
+  late Timestamp gamingTime = Timestamp.now();
+  late String memeTitle = "Initialisation Error";
+  late String meme = "Initialisation Error";
+  late Timestamp memeTime = Timestamp.now();
 
   @override
   void initState() {
     super.initState();
     fetchUserData();
+    fetchChallengeData();
   }
 
   void signOut() {
     FirebaseAuth.instance.signOut();
   }
 
+  // Get the user data
+  void fetchChallengeData() async {
+    // Get photo challenge detail
+    QuerySnapshot photoSnapshot = await FirebaseFirestore.instance
+        .collection("Challenge")
+        .where("name", isEqualTo: "Photo")
+        .get();
+
+    if (photoSnapshot.docs.isNotEmpty) {
+      var challengeData =
+          photoSnapshot.docs.first.data() as Map<String, dynamic>;
+      var title = challengeData['Title'];
+      var description = challengeData['Description'];
+      var timeStamp = challengeData['TimeStamp'];
+
+      setState(() {
+        photoTitle = title;
+        photo = description;
+        photoTime = timeStamp;
+      });
+    }
+
+    // Get gaming challenge detail
+    QuerySnapshot gamingSnapshot = await FirebaseFirestore.instance
+        .collection("Challenge")
+        .where("name", isEqualTo: "Gaming")
+        .get();
+
+    if (gamingSnapshot.docs.isNotEmpty) {
+      var challengeData =
+          gamingSnapshot.docs.first.data() as Map<String, dynamic>;
+      var gametitle = challengeData['Title'];
+      var description = challengeData['Description'];
+      var timeStamp = challengeData['TimeStamp'];
+
+      setState(() {
+        gamingTitle = gametitle;
+        gaming = description;
+        gamingTime = timeStamp;
+      });
+    }
+
+    // Get meme challenge detail
+    QuerySnapshot memeSnapshot = await FirebaseFirestore.instance
+        .collection("Challenge")
+        .where("name", isEqualTo: "Meme")
+        .get();
+
+    if (memeSnapshot.docs.isNotEmpty) {
+      var challengeData =
+          memeSnapshot.docs.first.data() as Map<String, dynamic>;
+      var title = challengeData['Title'];
+      var description = challengeData['Description'];
+      var timeStamp = challengeData['TimeStamp'];
+
+      setState(() {
+        memeTitle = title;
+        meme = description;
+        memeTime = timeStamp;
+      });
+    }
+  }
+
+  // Get the user data
   void fetchUserData() async {
     QuerySnapshot userSnapshot = await FirebaseFirestore.instance
         .collection("users")
@@ -67,6 +146,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Pick the image from gallery
   Future imgFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -233,9 +313,27 @@ class _HomePageState extends State<HomePage> {
                   if (snapshot.hasData) {
                     allPosts = snapshot.data!.docs;
                     return ListView.builder(
-                      itemCount: allPosts.length,
+                      itemCount:
+                          allPosts.length + 1, // Add 1 for the extra item
                       itemBuilder: (context, index) {
-                        final post = allPosts[index];
+                        if (index == 0) {
+                          // Return your widget for the first item
+                          return Container(
+                            margin:
+                                EdgeInsets.only(top: 25, left: 25, right: 25),
+                            child: ChallengeWidget(
+                              gamingTitle: gamingTitle,
+                              gaming: gaming,
+                              memeTitle: memeTitle,
+                              meme: meme,
+                              photoTitle: photoTitle,
+                              photo: photo,
+                              photoTime: photoTime,
+                            ),
+                          );
+                        }
+
+                        final post = allPosts[index - 1];
                         return WallPost(
                           message: post['Message'],
                           user: post['User'],

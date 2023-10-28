@@ -21,3 +21,22 @@ String formatDate(Timestamp timestamp) {
 
   return formattedDate;
 }
+
+String create14DayTimer(Timestamp timestamp) {
+  DateTime originalDate = timestamp.toDate();
+  DateTime targetDate = originalDate.add(const Duration(days: 21));
+
+  Duration remainingDuration = targetDate.difference(DateTime.now());
+  if (remainingDuration.inSeconds > 0) {
+    int days = remainingDuration.inDays;
+    int hours = (remainingDuration.inHours % 24);
+    int minutes = (remainingDuration.inMinutes % 60);
+    int seconds = (remainingDuration.inSeconds % 60);
+
+    String formattedTimeLeft = '$days.d $hours.h $minutes.min $seconds.sec';
+    return formattedTimeLeft;
+  } else {
+    // Timer has reached its target date
+    return 'Timer Expired';
+  }
+}

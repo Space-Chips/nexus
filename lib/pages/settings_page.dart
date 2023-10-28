@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/components/editable_text_box.dart';
 import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/home_page.dart';
 
 class ProfilePageSettings extends StatefulWidget {
   const ProfilePageSettings({super.key});
@@ -166,6 +167,16 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
     }
   }
 
+  // navigate to home page
+  void goToHomePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var docRef = FirebaseFirestore.instance
@@ -185,10 +196,17 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
             child: AppBar(
-              title: Text(
-                "P R O F I L E  P A G E",
-                selectionColor: Theme.of(context).colorScheme.primary,
+              title: GestureDetector(
+                onTap: () {
+                  // Call your function here
+                  goToHomePage();
+                },
+                child: Text(
+                  "P R O F I L E  P A G E",
+                  selectionColor: Theme.of(context).colorScheme.primary,
+                ),
               ),
+
               centerTitle: true,
 
               elevation: 0.0,

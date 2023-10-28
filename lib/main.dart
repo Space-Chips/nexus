@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
               color: Colors.grey[900],
             ),
           ),
-          nextScreen: const AuthPage(),
+          nextScreen: const AdPage(),
         ),
         debugShowCheckedModeBanner: false,
         theme: theme,

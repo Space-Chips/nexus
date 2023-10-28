@@ -72,15 +72,7 @@ class _FullScreenImgState extends State<FullScreenImg> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            goToHomePage();
-          },
-        ),
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: Icon(
@@ -109,6 +101,7 @@ class _FullScreenImgState extends State<FullScreenImg> {
                     if (progress != null) {
                       return CircularProgressIndicator();
                     }
+                    // ignore: unnecessary_null_comparison
                     if (child == null) {
                       return Text(
                         'Failed to load image', // Handle image loading error

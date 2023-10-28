@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nexus/pages/home_page.dart';
 import 'package:nexus/pages/profile_page.dart';
 
 class UserSearch extends StatefulWidget {
@@ -29,11 +30,30 @@ class _UserSearchState extends State<UserSearch> {
     );
   }
 
+  // navigate to home page
+  void goToHomePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('S E A R C H  U S E R'),
+        title: GestureDetector(
+          onTap: () {
+            // Call your function here
+            goToHomePage();
+          },
+          child: Text(
+            "S E A R C H  U S E R",
+            selectionColor: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
