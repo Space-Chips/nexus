@@ -13,9 +13,9 @@ import 'package:nexus/pages/home_page.dart';
 class ProfilePage extends StatefulWidget {
   final String username;
   const ProfilePage({
-    Key? key,
+    super.key,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();

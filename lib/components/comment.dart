@@ -11,14 +11,14 @@ class Comment extends StatefulWidget {
   final String usernameState;
 
   const Comment({
-    Key? key,
+    super.key,
     required this.text,
     required this.user,
     required this.time,
     required this.postId,
     required this.commentId,
     required this.usernameState,
-  }) : super(key: key);
+  });
 
   @override
   State<Comment> createState() => _CommentState();

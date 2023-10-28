@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/challenge_components/submition_widget.dart';
 import 'package:nexus/helper/helper_methods.dart';
@@ -186,15 +185,17 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
   }
 }
 
+// ignore: must_be_immutable
 class ChallengePicker extends StatefulWidget {
   String pickChallengeString;
 
   ChallengePicker({
     required this.pickChallengeString,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _ChallengePickerState createState() => _ChallengePickerState();
 }
 

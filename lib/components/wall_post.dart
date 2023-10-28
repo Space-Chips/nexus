@@ -524,20 +524,17 @@ class _WallPostState extends State<WallPost> {
                 },
                 child: SizedBox(
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CachedNetworkImage(
-                            imageUrl: mediaUrl,
-                            errorWidget: (context, url, error) => Icon(
-                              Icons.error,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                    borderRadius: BorderRadius.circular(15),
+                    child: CachedNetworkImage(
+                      imageUrl: mediaUrl,
+                      placeholder: (context, url) =>
                           CircularProgressIndicator(),
-                        ],
-                      )),
+                      errorWidget: (context, url, error) {
+                        // Show the loading indicator in case of an error
+                        return CircularProgressIndicator();
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),

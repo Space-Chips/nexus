@@ -494,10 +494,10 @@ class _SubmitionWidgetState extends State<SubmitionWidget> {
                       imageUrl: mediaUrl,
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Icon(
-                        Icons.error,
-                        color: Colors.grey[600],
-                      ),
+                      errorWidget: (context, url, error) {
+                        // Show the loading indicator in case of an error
+                        return CircularProgressIndicator();
+                      },
                     ),
                   ),
                 ),
@@ -676,6 +676,7 @@ class _SubmitionWidgetState extends State<SubmitionWidget> {
               if (widget.user == usernameState) DeleteButton(onTap: deletePost)
             ],
           ),
+          if (mediaUrl != null) SizedBox(height: 5),
         ],
       ),
     );

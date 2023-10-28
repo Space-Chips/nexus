@@ -13,12 +13,12 @@ class FullScreenImg extends StatefulWidget {
   final String timeStamp;
 
   const FullScreenImg({
-    Key? key,
+    super.key,
     required this.photoUrl,
     required this.message,
     required this.username,
     required this.timeStamp,
-  }) : super(key: key);
+  });
 
   @override
   State<FullScreenImg> createState() => _FullScreenImgState();

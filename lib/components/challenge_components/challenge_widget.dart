@@ -27,7 +27,7 @@ class ChallengeWidget extends StatefulWidget {
   final photo;
 
   const ChallengeWidget({
-    Key? key,
+    super.key,
     //required this.comments,
     required this.gaming,
     required this.meme,
@@ -36,7 +36,7 @@ class ChallengeWidget extends StatefulWidget {
     required this.memeTitle,
     required this.photoTitle,
     required this.photoTime,
-  }) : super(key: key);
+  });
 
   @override
   _ChallengeWidgetState createState() => _ChallengeWidgetState();

@@ -8,7 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nexus/components/post_field.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexus/pages/submitions_page.dart';
 import 'package:path/path.dart' as Path;
@@ -18,8 +17,8 @@ class ChallengePicker extends StatefulWidget {
   //final List<String> comments;
 
   const ChallengePicker({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _ChallengePickerState createState() => _ChallengePickerState();
@@ -36,6 +35,7 @@ class _ChallengePickerState extends State<ChallengePicker> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final ImagePicker _picker = ImagePicker();
   File? _photo;
+  // ignore: unused_field
   Widget _selectedImageWidget = Container();
   bool isLiked = false;
   bool isAdminState = false;
@@ -287,92 +287,6 @@ class _ChallengePickerState extends State<ChallengePicker> {
               : Colors.grey[600],
           fontSize: 16,
           fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _secondaryInfos() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        //Icon(Icons.access_time, color: Colors.grey[600]),
-        Text(timeLeft, style: TextStyle(color: Colors.grey[600])),
-        //Icon(Icons.star, color: Colors.grey[600]),
-        Text("   ", style: TextStyle(color: Colors.grey[600])),
-        Text(submitionNumber.toString(),
-            style: TextStyle(color: Colors.grey[600])),
-      ],
-    );
-  }
-
-  Widget _buildAdditionalInfo() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildActionButton("SUBMIT", () {
-          setState(() {});
-          showTextBar = !showTextBar;
-
-          // _showAddPostDialog();
-        }),
-        const SizedBox(width: 20),
-        _buildActionButton("VIEW", () {
-          goToSubmitionPage();
-        }),
-      ],
-    );
-  }
-
-  Widget _postWidget() {
-    return Column(
-      children: [
-        const SizedBox(height: 15),
-
-        // Post comment
-        Row(
-          children: [
-            // Textfield
-            Expanded(
-              child: MyPostField(
-                controller: postTextController,
-                hintText: "Post your submission...",
-                obscureText: false,
-                imgFromGallery: imgFromGallery,
-                imgFromCamera: imgFromCamera,
-              ),
-            ),
-
-            // Post button
-            IconButton(
-              onPressed: postSubmition,
-              icon: const Icon(Icons.arrow_circle_up),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(String text, VoidCallback onPressed) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.tertiary),
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.tertiary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
         ),
       ),
     );

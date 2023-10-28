@@ -11,13 +11,13 @@ class MyPostField extends StatelessWidget {
   final bool obscureText;
 
   const MyPostField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
     required this.imgFromGallery,
     required this.imgFromCamera,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

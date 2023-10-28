@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class CommunityContext extends StatefulWidget {
   final String text;
 
-  const CommunityContext({Key? key, required this.text}) : super(key: key);
+  const CommunityContext({super.key, required this.text});
 
   @override
   _CommunityContextState createState() => _CommunityContextState();

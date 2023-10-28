@@ -5,12 +5,11 @@ import 'package:nexus/components/button.dart';
 
 class PolicyDialog extends StatelessWidget {
   PolicyDialog({
-    Key? key,
+    super.key,
     required this.mdFileName,
     this.radius = 8,
-  })  : assert(mdFileName.contains('.md'),
-            'The file must contain the .md extension'),
-        super(key: key);
+  }) : assert(mdFileName.contains('.md'),
+            'The file must contain the .md extension');
 
   final double radius;
   final String mdFileName;
