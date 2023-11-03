@@ -86,20 +86,25 @@ class _FullScreenImgState extends State<FullScreenImg> {
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
+          shrinkWrap: true,
           children: [
-            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the radius as needed
                 child: Image.network(
                   widget.photoUrl,
                   loadingBuilder: (context, child, progress) {
                     if (progress != null) {
-                      return CircularProgressIndicator();
+                      return Center(
+                        child: SizedBox(
+                          width: 40, // Adjust the width as needed
+                          height: 40, // Adjust the height as needed
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     }
                     // ignore: unnecessary_null_comparison
                     if (child == null) {

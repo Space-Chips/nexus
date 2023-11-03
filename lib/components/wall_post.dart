@@ -52,9 +52,9 @@ class _WallPostState extends State<WallPost> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   bool isAdminState = false;
-  String usernameState = "usernameState";
-  String userEmail = "userEmail";
-  String postUsername = "Test Username";
+  String usernameState = "[Deleted]";
+  String userEmail = "[Deleted]";
+  String postUsername = "[Deleted]";
   final commentTextController = TextEditingController();
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
@@ -71,6 +71,7 @@ class _WallPostState extends State<WallPost> {
     fetchUserData();
     addView();
     getCommentNumber();
+    fetchPostUsername();
     //fetchIdData();
     if (widget.mediaDest.isNotEmpty) {
       getMediaUrl();
@@ -132,6 +133,28 @@ class _WallPostState extends State<WallPost> {
         usernameState = username;
         isAdminState = isAdmin;
         userEmail = email;
+      });
+    } else {
+      //print("User data not found");
+    }
+  }
+
+  // Fetch user data from Firebase
+  void fetchPostUsername() async {
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("email", isEqualTo: widget.userEmail)
+        .get();
+
+    if (userSnapshot.docs.isNotEmpty) {
+      // Check if any documents match the query
+      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+
+      var username = userData['username'];
+
+      setState(() {
+        // Update isAdmin and username in the state
+        postUsername = username;
       });
     } else {
       //print("User data not found");
@@ -564,10 +587,10 @@ class _WallPostState extends State<WallPost> {
                         onTap: () {
                           HapticFeedback.mediumImpact();
 
-                          goToProfilePage(widget.user);
+                          goToProfilePage(postUsername);
                         },
                         child: Text(
-                          widget.user,
+                          postUsername,
                           style: TextStyle(color: Colors.grey[400]),
                         ),
                       ),

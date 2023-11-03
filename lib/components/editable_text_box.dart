@@ -13,46 +13,47 @@ class MyEditableTextBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.all(25.0),
+      child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.only(
-          left: 15,
-          right: 15,
-          bottom: 20,
-        ),
-        margin: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: 20,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // section name
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // section name
-                Text(sectionName, style: TextStyle(color: Colors.grey[500])),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // section name
 
-                // edit button
-                IconButton(
-                  onPressed: onPressed,
-                  icon: Icon(
-                    Icons.settings,
-                    color: Colors.grey[500],
+                  // section name
+                  Text(sectionName, style: TextStyle(color: Colors.grey[500])),
+                  const SizedBox(height: 5),
+
+                  // text
+                  Row(
+                    children: [
+                      Text(text),
+                      // edit button
+                    ],
                   ),
-                )
-              ],
-            ),
-
-            // text
-            Text(text),
-          ],
-        ));
+                ],
+              ),
+              IconButton(
+                onPressed: onPressed,
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.grey[500],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

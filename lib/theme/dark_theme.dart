@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:settings_ui/settings_ui.dart';
 
 ThemeData darkTheme = ThemeData(
   appBarTheme: const AppBarTheme(
@@ -20,4 +21,8 @@ ThemeData darkTheme = ThemeData(
         Colors.blue.withOpacity(0.2), // Set the text selection color
     selectionHandleColor: Colors.blue, // Set the selection handle color
   ),
+);
+
+SettingsThemeData darkSettingsTheme = const SettingsThemeData(
+  settingsListBackground: Colors.black,
 );

@@ -32,11 +32,30 @@ class _ProfilePageState extends State<ProfilePage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool showPosts = true;
   bool isFollowing = false;
+  bool isAdminState = false;
 
   @override
   void initState() {
     super.initState();
     loadUserData();
+    fetchUserData();
+  }
+
+  // Get the user data
+  void fetchUserData() async {
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("email", isEqualTo: currentUser.email)
+        .get();
+
+    if (userSnapshot.docs.isNotEmpty) {
+      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+      var isAdmin = userData['admin'];
+
+      setState(() {
+        isAdminState = isAdmin;
+      });
+    }
   }
 
   // Load user data
@@ -55,6 +74,45 @@ class _ProfilePageState extends State<ProfilePage> {
     } else {
       // Handle the case where no user is found.
     }
+  }
+
+  // show an account deletition dialog
+  void showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("DELETE YOUR ACCOUNT & DATA"),
+        actions: [
+          // "Yes" button
+          TextButton(
+            onPressed: () async {
+              // Delete the user's data from Firestore
+              final userDocs = await FirebaseFirestore.instance
+                  .collection("users")
+                  .where("email", isEqualTo: currentUser.email)
+                  .get();
+
+              for (var doc in userDocs.docs) {
+                await doc.reference.delete();
+              }
+
+              // Delete the user account from Firebase Auth
+              await currentUser.delete();
+
+              // Dismiss the dialog
+              Navigator.pop(context);
+            },
+            child: Text("Y E S"),
+          ),
+
+          // "Cancel" button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("C A N C E L"),
+          )
+        ],
+      ),
+    );
   }
 
   // Navigate to Home page
@@ -94,10 +152,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Toggle following
   void toggleFollowing() async {
-    setState(() {
-      isFollowing = !isFollowing;
-    });
-
     // Access the document in Firebase using the document ID
     final userQuery = await FirebaseFirestore.instance
         .collection("users")
@@ -113,6 +167,9 @@ class _ProfilePageState extends State<ProfilePage> {
         'followers': isFollowing
             ? FieldValue.arrayUnion([currentUser.email])
             : FieldValue.arrayRemove([currentUser.email]),
+      });
+      setState(() {
+        isFollowing = !isFollowing;
       });
     }
   }
@@ -173,147 +230,161 @@ class _ProfilePageState extends State<ProfilePage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25.0),
-                          color: Colors.grey[100],
-                        ),
-                        child: SizedBox(
-                          width: 100.0,
-                          height: 100.0,
-                          child: SizedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.all(3.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(22.0),
-                                  color:
-                                      Theme.of(context).colorScheme.background,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.0),
+                          color: Theme.of(context).colorScheme.primary),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 20),
+                            Center(
+                              child: Text(
+                                username[0].toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 50,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
                                 ),
-                                child: Center(
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  username,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.grey[700], fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (address != "")
+                                  Icon(
+                                    Icons.location_pin,
+                                    color: Colors.grey[700],
+                                    size: 20,
+                                  ),
+                                if (address != "")
+                                  Text(
+                                    userDocument['address'],
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                if (address != "") SizedBox(width: 20),
+                                Icon(
+                                  Icons.calendar_month_rounded,
+                                  color: Colors.grey[700],
+                                  size: 20,
+                                ),
+                                Text(
+                                  "Joined ${formatDate(userDocument['joinDate'])}",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                if (admin == true) SizedBox(width: 20),
+                                if (admin == true)
+                                  Icon(
+                                    Icons.shield_outlined,
+                                    color: Colors.grey[700],
+                                    size: 20,
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (website != "")
+                                  Icon(
+                                    Icons.link_outlined,
+                                    color: Colors.grey[700],
+                                    size: 20,
+                                  ),
+                                if (website != "") const SizedBox(width: 10),
+                                if (website != "")
+                                  Text(
+                                    website,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                              ],
+                            ),
+                            if (website != "") const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  userDocument['followers'].length.toString(),
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  userDocument['followers'].length == 1
+                                      ? 'follower'
+                                      : 'followers',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                const SizedBox(width: 10),
+                                TextButton(
+                                  onPressed: () {
+                                    toggleFollowing();
+                                  },
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      isFollowing ? Colors.white : Colors.blue,
+                                    ),
+                                    padding: MaterialStateProperty.all<
+                                        EdgeInsetsGeometry>(
+                                      EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 10,
+                                      ),
+                                    ),
+                                    shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
                                   child: Text(
-                                    username[0].toUpperCase(),
+                                    isFollowing ? "Following" : "Follow",
                                     style: TextStyle(
-                                      fontSize: 50,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiary,
+                                      color: isFollowing
+                                          ? Colors.black
+                                          : Colors.white,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
-                              ),
+                                if (isAdminState == true && admin == false)
+                                  const SizedBox(width: 10),
+                                if (isAdminState == true && admin == false)
+                                  IconButton(
+                                    onPressed: showDeleteDialog,
+                                    icon: Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                              ],
                             ),
-                          ),
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 25),
-                      Text(
-                        widget.username,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (address != "")
-                            Icon(
-                              Icons.location_pin,
-                              color: Colors.grey[700],
-                              size: 20,
-                            ),
-                          if (address != "")
-                            Text(
-                              userDocument['address'],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey[700]),
-                            ),
-                          if (address != "") SizedBox(width: 20),
-                          Icon(
-                            Icons.calendar_month_rounded,
-                            color: Colors.grey[700],
-                            size: 20,
-                          ),
-                          Text(
-                            "Joined ${formatDate(userDocument['joinDate'])}",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                          if (website != "")
-                            Icon(
-                              Icons.link_outlined,
-                              color: Colors.grey[700],
-                              size: 20,
-                            ),
-                          if (website != "")
-                            Text(
-                              website,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          if (admin == true) SizedBox(width: 20),
-                          if (admin == true)
-                            Icon(
-                              Icons.shield_outlined,
-                              color: Colors.grey[700],
-                              size: 20,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            userDocument['followers'].length.toString(),
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            userDocument['followers'].length == 1
-                                ? 'follower'
-                                : 'followers',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                          const SizedBox(width: 10),
-                          TextButton(
-                            onPressed: () {
-                              toggleFollowing();
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                isFollowing ? Colors.white : Colors.blue,
-                              ),
-                              padding:
-                                  MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                EdgeInsets.symmetric(
-                                  vertical: 5,
-                                  horizontal: 10,
-                                ),
-                              ),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              isFollowing ? "Following" : "Follow",
-                              style: TextStyle(
-                                color:
-                                    isFollowing ? Colors.black : Colors.white,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -339,9 +410,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Text(
                           'Posts',
                           style: TextStyle(
-                            color: showPosts ? Colors.blue : Colors.grey[600],
-                            decoration:
-                                showPosts ? TextDecoration.underline : null,
+                            color: showPosts
+                                ? Theme.of(context).colorScheme.tertiary
+                                : Colors.grey[600],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -355,9 +428,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Text(
                           'Chats',
                           style: TextStyle(
-                            color: !showPosts ? Colors.blue : Colors.grey[600],
-                            decoration:
-                                !showPosts ? TextDecoration.underline : null,
+                            color: !showPosts
+                                ? Theme.of(context).colorScheme.tertiary
+                                : Colors.grey[600],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -387,7 +462,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         }
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                           return SliverToBoxAdapter(
-                            child: Center(child: Text('No posts found.')),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  SizedBox(height: 50),
+                                  Text('No posts found.'),
+                                ],
+                              ),
+                            ),
                           );
                         }
 
@@ -428,14 +511,28 @@ class _ProfilePageState extends State<ProfilePage> {
                         }
                         if (snapshot.hasError) {
                           return SliverToBoxAdapter(
-                            child:
-                                Center(child: Text('Error: ${snapshot.error}')),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 50),
+                                  Text('Error: ${snapshot.error}'),
+                                ],
+                              ),
+                            ),
                           );
                         }
 
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                           return SliverToBoxAdapter(
-                            child: Center(child: Text('No chats found.')),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  SizedBox(height: 50),
+                                  Text('No chats found.'),
+                                ],
+                              ),
+                            ),
                           );
                         }
 

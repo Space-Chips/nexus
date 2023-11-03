@@ -302,18 +302,6 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(color: Colors.grey[700]),
                                   ),
-                                  if (website != "")
-                                    Icon(
-                                      Icons.link_outlined,
-                                      color: Colors.grey[700],
-                                      size: 20,
-                                    ),
-                                  if (website != "")
-                                    Text(
-                                      website,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
                                   if (admin == true) SizedBox(width: 20),
                                   if (admin == true)
                                     Icon(
@@ -327,6 +315,18 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  if (website != "")
+                                    Icon(
+                                      Icons.link_outlined,
+                                      color: Colors.grey[700],
+                                      size: 20,
+                                    ),
+                                  if (website != "")
+                                    Text(
+                                      website,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: Colors.blue),
+                                    ),
                                   Text(
                                     userDocument['followers'].length.toString(),
                                     style: TextStyle(color: Colors.grey[700]),

@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/challenge_components/challenge_widget.dart';
+import 'package:nexus/pages/settings/your-account/your_account.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:nexus/components/drawer.dart';
@@ -15,7 +16,6 @@ import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
-import 'package:nexus/pages/settings_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -56,10 +56,32 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     fetchUserData();
     fetchChallengeData();
+    checkAccountAndSignOut();
   }
 
   void signOut() {
     FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> checkAccountAndSignOut() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // User is not signed in, nothing to check or sign out.
+      return;
+    }
+
+    try {
+      await user.reload();
+      final freshUser = FirebaseAuth.instance.currentUser;
+
+      if (freshUser == null) {
+        // The user's account no longer exists, sign them out.
+        await FirebaseAuth.instance.signOut();
+      }
+    } catch (e) {
+      // An error occurred while refreshing the user's profile.
+    }
   }
 
   // Get the user data
@@ -229,7 +251,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfilePageSettings(),
+        builder: (context) => YourAccountPage(),
       ),
     );
   }
@@ -296,7 +318,9 @@ class _HomePageState extends State<HomePage> {
         isAdmin: isAdminState,
         onThemeTap: () {
           Future.delayed(Duration(milliseconds: 5), () {
-            AdaptiveTheme.of(context).toggleThemeMode();
+            setState(() {
+              AdaptiveTheme.of(context).toggleThemeMode();
+            });
           });
         },
       ),

@@ -76,7 +76,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'admin': false,
         'followers': [],
         'interests': [],
-        'relationshipStatus': false,
+        'relationshipStatus': "Single and loving it",
         'joinDate': Timestamp.now(),
         'username': emailTextController.text.split('@')[0], // initial username
         'bio': 'Empty bio...', // initial empty bio

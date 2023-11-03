@@ -53,7 +53,9 @@ dependencies:
   video_player: ^2.7.2
   photo_view: ^0.14.0
   path: ^1.8.3
-  
+  settings_ui: ^2.0.2
+  flutter_xlider: ^3.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,8 +64,9 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: true
+  macos: true
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/logo.jpeg"
   remove_alpha_ios: true
 
   # The "flutter_lints" package below contains a set of recommended lints to
