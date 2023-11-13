@@ -70,12 +70,42 @@ class _ChallengeWidgetState extends State<ChallengeWidget> {
   int submitionNumber = 0;
   List<QueryDocumentSnapshot> allPosts = [];
 
+  StreamSubscription<QuerySnapshot>? submitionsListener;
+
   @override
   void initState() {
     super.initState();
     updateTime();
     fetchUserData();
-    getSubcollectionCount();
+    setupSubmitionsListener();
+  }
+
+  @override
+  void dispose() {
+    submitionsListener
+        ?.cancel(); // Dispose of the listener when the widget is no longer visible
+    super.dispose();
+  }
+
+  void setupSubmitionsListener() {
+    // Set up a Firestore listener to get real-time updates for submitions
+    submitionsListener = FirebaseFirestore.instance
+        .collection('Challenge')
+        .where('name', isEqualTo: pickChallengeString)
+        .limit(1)
+        .snapshots()
+        .listen((QuerySnapshot querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentReference documentRef = querySnapshot.docs[0].reference;
+        Stream<QuerySnapshot> submitionsStream =
+            documentRef.collection('Submitions').snapshots();
+        submitionsStream.listen((submitions) {
+          setState(() {
+            submitionNumber = submitions.docs.length;
+          });
+        });
+      }
+    });
   }
 
   void goToSubmitionPage() {
@@ -87,41 +117,6 @@ class _ChallengeWidgetState extends State<ChallengeWidget> {
         ),
       ),
     );
-  }
-
-  Future<void> getSubcollectionCount() async {
-    QuerySnapshot collection = await FirebaseFirestore.instance
-        .collection('Challenge')
-        .where("name", isEqualTo: pickChallengeString)
-        .get();
-
-    if (collection.docs.isNotEmpty) {
-      DocumentReference documentRef = collection.docs.first.reference;
-
-      QuerySnapshot subcollection =
-          await documentRef.collection('Submitions').get();
-
-      setState(() {
-        submitionNumber = subcollection.docs.length;
-      });
-    }
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      QuerySnapshot collection = await FirebaseFirestore.instance
-          .collection('Challenge')
-          .where("name", isEqualTo: pickChallengeString)
-          .get();
-
-      if (collection.docs.isNotEmpty) {
-        DocumentReference documentRef = collection.docs.first.reference;
-
-        QuerySnapshot subcollection =
-            await documentRef.collection('Submitions').get();
-
-        setState(() {
-          submitionNumber = subcollection.docs.length;
-        });
-      }
-    });
   }
 
   // Pick the image from gallery

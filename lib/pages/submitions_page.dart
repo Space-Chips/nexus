@@ -27,7 +27,7 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
       "Test Username (please contact me on play store in case you see this)";
   String emailState = "Test user Email";
   String userId = "Test user Id";
-  String currentDocumentId = "";
+  String currentDocumentId = "xB1SkXsLnrADYNrbA0Pb";
   List<QueryDocumentSnapshot> allPosts = [];
 
   late String photoTitle = "Initialisation Error";

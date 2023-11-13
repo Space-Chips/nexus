@@ -16,10 +16,12 @@ class _CommunityContextState extends State<CommunityContext> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme.of(context).colorScheme.secondary,
         border: Border.all(
-          color: Colors.grey[600]!, // Replace with your desired border color
-          width: 1.0, // Adjust the border width as needed
+          color: Theme.of(context)
+              .colorScheme
+              .secondary, // Replace with your desired border color
+          width: 2.0, // Adjust the border width as needed
         ),
         borderRadius: BorderRadius.circular(7),
       ),

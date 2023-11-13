@@ -51,6 +51,7 @@ class WallPost extends StatefulWidget {
 class _WallPostState extends State<WallPost> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
+  bool isBlocked = false;
   bool isAdminState = false;
   String usernameState = "[Deleted]";
   String userEmail = "[Deleted]";
@@ -210,6 +211,39 @@ class _WallPostState extends State<WallPost> {
       //print("User data not found");
     }
   }*/
+
+  // toggle like
+  void blockUser() {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      isBlocked = !isBlocked;
+    });
+
+    // Access the document in Firebase
+    CollectionReference usersRef =
+        FirebaseFirestore.instance.collection('users');
+
+    Query query = usersRef.where("email", isEqualTo: currentUser.email);
+
+    query.get().then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // Get the specific DocumentReference
+        DocumentReference documentRef = doc.reference;
+
+        if (isBlocked) {
+          // If the user is being blocked, add their email to the 'blockedUsersEmails' array
+          documentRef.update({
+            'blockedUsersEmails': FieldValue.arrayUnion([widget.userEmail])
+          });
+        } else {
+          // If the user is being unblocked, remove their email from the 'blockedUsersEmails' array
+          documentRef.update({
+            'blockedUsersEmails': FieldValue.arrayRemove([widget.userEmail])
+          });
+        }
+      });
+    });
+  }
 
   // toggle like
   void toggleLike() {
@@ -590,7 +624,8 @@ class _WallPostState extends State<WallPost> {
                           goToProfilePage(postUsername);
                         },
                         child: Text(
-                          postUsername,
+                          widget.user,
+                          // usernamestate
                           style: TextStyle(color: Colors.grey[400]),
                         ),
                       ),
@@ -637,6 +672,20 @@ class _WallPostState extends State<WallPost> {
                               ],
                             ),
                           ),
+                          PopupMenuItem<String>(
+                            value: 'block_user',
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.block_outlined, color: Colors.black),
+                                SizedBox(width: 5),
+                                Text(
+                                  isBlocked ? "Unblock User" : "Block User",
+                                  style: TextStyle(color: Colors.black),
+                                )
+                              ],
+                            ),
+                          ),
                           if (isAdminState == true)
                             PopupMenuItem<String>(
                               value: 'delete',
@@ -679,6 +728,9 @@ class _WallPostState extends State<WallPost> {
                               break;
                             case 'delete':
                               deletePost();
+                              break;
+                            case 'block_user':
+                              blockUser();
                               break;
                           }
                         },
@@ -788,7 +840,7 @@ class _WallPostState extends State<WallPost> {
                           if (hasComments)
                             SizedBox(height: 20)
                           else
-                            SizedBox(height: 5),
+                            SizedBox(height: 20),
                           if (mediaUrl != null) SizedBox(height: 5),
 
                           // Post comment

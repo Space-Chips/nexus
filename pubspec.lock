@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  bottom_picker:
+    dependency: "direct main"
+    description:
+      name: bottom_picker
+      sha256: bec95c97a863ed11f4d428c97efa214a10ebe100899e6fd649a9d9dfadf1aaf1
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -392,14 +400,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_xlider:
-    dependency: "direct main"
-    description:
-      name: flutter_xlider
-      sha256: b83da229b8a2153adeefc5d9e08e0060689c8dc2187b30e3502cf67c1a6495be
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.5.0"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -505,7 +505,7 @@ packages:
     source: hosted
     version: "4.0.2"
   image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image
       sha256: "028f61960d56f26414eb616b48b04eb37d700cbe477b7fb09bf1d7ce57fd9271"
@@ -648,6 +648,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  native_ads_flutter:
+    dependency: "direct main"
+    description:
+      name: native_ads_flutter
+      sha256: "0de9f6a25ca1e825c55ffa2d8fb24f311b9a9bf5fcee1509a6cd1f3e6ef7b5cd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   octo_image:
     dependency: transitive
     description:

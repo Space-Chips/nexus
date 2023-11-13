@@ -50,7 +50,12 @@ class _FullScreenImgState extends State<FullScreenImg> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(message),
+        title: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        backgroundColor: Colors.white.withOpacity(0.1),
       ),
     );
   }

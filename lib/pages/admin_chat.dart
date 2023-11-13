@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/admin_chat_post.dart';
-import 'package:nexus/components/text_field.dart';
+import 'package:nexus/components/post_field.dart';
 import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/tools/user_chat_search_page.dart';
 
@@ -182,10 +182,12 @@ class _HomePageState extends State<AdminChatPage> {
                 children: [
                   // textfield
                   Expanded(
-                    child: MyTextField(
+                    child: MyPostField(
                       controller: textController,
                       hintText: 'Postez votre rumeur...',
                       obscureText: false,
+                      imgFromGallery: () {},
+                      imgFromCamera: () {},
                     ),
                   ),
 

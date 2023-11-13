@@ -23,24 +23,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Future signIn() async {
     //show loading circle
-    showDialog(
-      context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
-      ),
-    );
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailTextController.text.trim(),
         password: passwordTextController.text.trim(),
       );
-
-      // pop loading circle
-      if (context.mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       // pop loading circle
-      Navigator.pop(context);
       displayMessage(e.code);
     }
   }
@@ -50,7 +40,12 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(message),
+        title: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        backgroundColor: Colors.white.withOpacity(0.1),
       ),
     );
   }

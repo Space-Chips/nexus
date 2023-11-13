@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexus/components/button.dart';
@@ -16,6 +17,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   bool isEmailVerified = false;
   bool canResendEmail = false;
   Timer? timer;
+
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   // display a dialog message
   void displayMessage(String message) {
@@ -71,6 +74,21 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     setState(() => canResendEmail = true);
   }
 
+  // show an account deletition dialog
+  void showDeleteDialog() async {
+    final userDocs = await FirebaseFirestore.instance
+        .collection("users")
+        .where("email", isEqualTo: currentUser.email)
+        .get();
+
+    for (var doc in userDocs.docs) {
+      await doc.reference.delete();
+    }
+
+    // Delete the user account from Firebase Auth
+    await currentUser.delete();
+  }
+
   @override
   Widget build(BuildContext context) => isEmailVerified
       // ignore: prefer_const_constructors
@@ -112,6 +130,15 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       MyButton(
                         onTap: canResendEmail ? sendVerificationEmail : null,
                         text: 'Resend Email',
+                      ),
+                      TextButton(
+                        onPressed: showDeleteDialog,
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.tertiary),
+                        ),
                       ),
 
                       const SizedBox(height: 50),

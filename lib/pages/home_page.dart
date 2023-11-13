@@ -4,7 +4,9 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/challenge_components/challenge_widget.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
@@ -50,6 +52,8 @@ class _HomePageState extends State<HomePage> {
   late String memeTitle = "Initialisation Error";
   late String meme = "Initialisation Error";
   late Timestamp memeTime = Timestamp.now();
+
+  var blockedUsersEmails = [];
 
   @override
   void initState() {
@@ -149,22 +153,29 @@ class _HomePageState extends State<HomePage> {
 
   // Get the user data
   void fetchUserData() async {
-    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .where("email", isEqualTo: currentUser.email)
-        .get();
+    try {
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("email", isEqualTo: currentUser.email)
+          .get();
 
-    if (userSnapshot.docs.isNotEmpty) {
-      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
-      var username = userData['username'];
-      var isAdmin = userData['admin'];
-      var email = userData['email'];
+      if (userSnapshot.docs.isNotEmpty) {
+        var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+        var blockedUsers = userData['blockedUsersEmails'] ??
+            <String>[]; // Initialize with an empty list if null
+        var username = userData['username'];
+        var isAdmin = userData['admin'];
+        var email = userData['email'];
 
-      setState(() {
-        usernameState = username;
-        isAdminState = isAdmin;
-        emailState = email;
-      });
+        setState(() {
+          blockedUsersEmails = blockedUsers;
+          usernameState = username;
+          isAdminState = isAdmin;
+          emailState = email;
+        });
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -192,18 +203,40 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future uploadFile() async {
+  Future<void> uploadFile() async {
     if (_photo == null) return;
     final fileName = Path.basename(_photo!.path);
     const destination = 'files/';
 
     try {
+      // Read the image file
+      final imageBytes = await _photo!.readAsBytes();
+
+      // Decode the image
+      img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
+
+      // Check if the image is null
+      if (image == null) {
+        // Handle the error
+        return;
+      }
+
+      // Optionally, you can resize the image to reduce its dimensions
+      // image = img.copyResize(image, width: 800, height: 600);
+
+      // Convert the image to JPEG with a specified quality (adjust quality as needed)
+      final compressedBytes = img.encodeJpg(image, quality: 80);
+
+      // Create a reference to the Firebase Storage location
       final ref = firebase_storage.FirebaseStorage.instance
           .ref(destination)
           .child('media/$fileName');
-      await ref.putFile(_photo!);
+
+      // Upload the compressed image
+      await ref.putData(compressedBytes);
     } catch (e) {
       // Handle the error
+      print('Error uploading file: $e');
     }
   }
 
@@ -319,127 +352,144 @@ class _HomePageState extends State<HomePage> {
         onThemeTap: () {
           Future.delayed(Duration(milliseconds: 5), () {
             setState(() {
+              HapticFeedback.heavyImpact();
               AdaptiveTheme.of(context).toggleThemeMode();
             });
           });
         },
       ),
       body: Center(
-        child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('Posts')
-                    .orderBy('TimeStamp', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    allPosts = snapshot.data!.docs;
-                    return ListView.builder(
-                      itemCount:
-                          allPosts.length + 1, // Add 1 for the extra item
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          // Return your widget for the first item
-                          return Container(
-                            margin:
-                                EdgeInsets.only(top: 25, left: 25, right: 25),
-                            child: ChallengeWidget(
-                              gamingTitle: gamingTitle,
-                              gaming: gaming,
-                              memeTitle: memeTitle,
-                              meme: meme,
-                              photoTitle: photoTitle,
-                              photo: photo,
-                              photoTime: photoTime,
-                            ),
-                          );
-                        }
+        child: GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            if (details.primaryDelta! < -20) {
+              Scaffold.of(context).openDrawer();
+            }
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('Posts')
+                      .orderBy('TimeStamp', descending: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final allPosts = snapshot.data!.docs;
 
-                        final post = allPosts[index - 1];
-                        return WallPost(
-                          message: post['Message'],
-                          user: post['User'],
-                          userEmail: post['UserEmail'],
-                          isAdminPost: post['isAdminPost'],
-                          mediaDest: post['MediaDestination'],
-                          contextText: post['Context'],
-                          postId: post.id,
-                          likes: List<String>.from(post['Likes'] ?? []),
-                          views: List<String>.from(post['Views'] ?? []),
-                          time: formatDate(post['TimeStamp']),
-                        );
-                      },
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  }
-                  return const Center(
-                    child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(25.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: MyPostField(
-                      controller: textController,
-                      hintText: "Post a message...",
-                      obscureText: false,
-                      imgFromGallery: imgFromGallery,
-                      imgFromCamera: imgFromCamera,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: postMessage,
-                    icon: const Icon(Icons.arrow_circle_up),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 25),
-              child: Text("Logged in as: ${currentUser.email!}"),
-            ),
-            if (_photo != null)
-              _selectedImageWidget = Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25.0),
+                      // Continue with your logic to filter posts based on blocked users (blockedUsersEmails)
+                      final filteredPosts = allPosts
+                          .where((post) =>
+                              !blockedUsersEmails.contains(post['UserEmail']))
+                          .toList();
+
+                      return ListView.separated(
+                        itemCount: filteredPosts.length + 1,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(width: 1),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            // Return your widget for the first item
+                            return Container(
+                              margin:
+                                  EdgeInsets.only(top: 25, left: 25, right: 25),
+                              child: ChallengeWidget(
+                                gamingTitle: gamingTitle,
+                                gaming: gaming,
+                                memeTitle: memeTitle,
+                                meme: meme,
+                                photoTitle: photoTitle,
+                                photo: photo,
+                                photoTime: photoTime,
+                              ),
+                            );
+                          }
+
+                          final post = filteredPosts[index - 1];
+                          return WallPost(
+                            message: post['Message'],
+                            user: post['User'],
+                            userEmail: post['UserEmail'],
+                            isAdminPost: post['isAdminPost'],
+                            mediaDest: post['MediaDestination'],
+                            contextText: post['Context'],
+                            postId: post.id,
+                            likes: List<String>.from(post['Likes'] ?? []),
+                            views: List<String>.from(post['Views'] ?? []),
+                            time: formatDate(post['TimeStamp']),
+                          );
+                        },
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(25.0),
-                        child: _selectedImageWidget,
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: MyPostField(
+                        controller: textController,
+                        hintText: "Post a message...",
+                        obscureText: false,
+                        imgFromGallery: imgFromGallery,
+                        imgFromCamera: imgFromCamera,
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: 10.0,
-                    left: 10.0,
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedImageWidget = Container();
-                          _photo = null;
-                        });
-                      },
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ),
-                ],
+                    IconButton(
+                      onPressed: postMessage,
+                      icon: const Icon(Icons.arrow_circle_up),
+                    )
+                  ],
+                ),
               ),
-            if (_photo != null) SizedBox(height: 10),
-          ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 25),
+                child: Text("Logged in as: ${currentUser.email!}"),
+              ),
+              if (_photo != null)
+                _selectedImageWidget = Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(25.0),
+                          child: _selectedImageWidget,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10.0,
+                      left: 10.0,
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedImageWidget = Container();
+                            _photo = null;
+                          });
+                        },
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ),
+                  ],
+                ),
+              if (_photo != null) SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );

@@ -14,14 +14,20 @@ class AdPage extends StatefulWidget {
 class _AdPageState extends State<AdPage> {
   late BannerAd _bannerAd;
   late BannerAd _bannerAd2;
+  late BannerAd _bannerAd3;
+  late BannerAd _bannerAd4;
   bool _isAdLoaded = false;
   bool _isAd2Loaded = false;
+  bool _isAd3Loaded = false;
+  bool _isAd4Loaded = false;
 
   @override
   void initState() {
     super.initState();
     _initBannerAd();
     _initBannerAd2();
+    _initBannerAd3();
+    _initBannerAd4();
     // Start a timer to navigate to AuthPage after 3 seconds
     Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
@@ -61,6 +67,40 @@ class _AdPageState extends State<AdPage> {
       request: const AdRequest(),
     );
     _bannerAd2.load();
+  }
+
+  _initBannerAd3() {
+    _bannerAd3 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId3,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAd3Loaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd3.load();
+  }
+
+  _initBannerAd4() {
+    _bannerAd4 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId4,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAd4Loaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd4.load();
   }
 
   @override
@@ -115,6 +155,13 @@ class _AdPageState extends State<AdPage> {
                                       height: _bannerAd2.size.height.toDouble(),
                                       width: _bannerAd2.size.width.toDouble(),
                                       child: AdWidget(ad: _bannerAd2),
+                                    )
+                                  : const SizedBox(),
+                              _isAd3Loaded
+                                  ? SizedBox(
+                                      height: _bannerAd3.size.height.toDouble(),
+                                      width: _bannerAd3.size.width.toDouble(),
+                                      child: AdWidget(ad: _bannerAd3),
                                     )
                                   : const SizedBox(),
                               if (!_isAdLoaded && !_isAd2Loaded)

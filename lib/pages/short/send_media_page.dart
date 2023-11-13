@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:nexus/components/text_field.dart';
+import 'package:nexus/components/post_field.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:nexus/pages/home_page.dart';
 import 'package:path/path.dart' as Path;
@@ -169,10 +169,12 @@ class _SendMediaPageState extends State<SendMediaPage> {
                 children: [
                   // textfield
                   Expanded(
-                    child: MyTextField(
+                    child: MyPostField(
                       controller: textController,
                       hintText: "Post a message...",
                       obscureText: false,
+                      imgFromGallery: () {},
+                      imgFromCamera: () {},
                     ),
                   ),
 

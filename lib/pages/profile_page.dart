@@ -33,6 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool showPosts = true;
   bool isFollowing = false;
   bool isAdminState = false;
+  late int followerCount;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
       var userDocument = snapshot.docs[0];
       setState(() {
         isFollowing = userDocument['followers'].contains(currentUser.email);
+        followerCount = userDocument['followers'].length;
       });
     } else {
       // Handle the case where no user is found.
@@ -129,27 +131,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Define the displayMessage method
-  void displayMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Message"),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // Toggle following
   void toggleFollowing() async {
     // Access the document in Firebase using the document ID
@@ -163,13 +144,22 @@ class _ProfilePageState extends State<ProfilePage> {
       final userReference =
           FirebaseFirestore.instance.collection("users").doc(userDoc.id);
 
+      final followersList = List<String>.from(userDoc['followers'] ?? []);
+
+      if (!isFollowing) {
+        followersList.add(currentUser.email!); // Use null-aware operator here
+      } else {
+        followersList
+            .remove(currentUser.email!); // Use null-aware operator here
+      }
+
       await userReference.update({
-        'followers': isFollowing
-            ? FieldValue.arrayUnion([currentUser.email])
-            : FieldValue.arrayRemove([currentUser.email]),
+        'followers': followersList,
       });
+
       setState(() {
         isFollowing = !isFollowing;
+        followerCount = followersList.length;
       });
     }
   }
@@ -193,7 +183,11 @@ class _ProfilePageState extends State<ProfilePage> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: AppBar(
-              title: Text(widget.username),
+              title: GestureDetector(
+                  onTap: () {
+                    goToHomePage();
+                  },
+                  child: Text(widget.username)),
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),

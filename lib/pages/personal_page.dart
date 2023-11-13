@@ -30,27 +30,6 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
   bool showPosts = true;
   bool isFollowing = false;
 
-  // Define the displayMessage method
-  void displayMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Message"),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // show an account deletition dialog
   void showDeleteDialog() {
     showDialog(
