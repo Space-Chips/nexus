@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/components/admin_chat_post.dart';
 import 'package:nexus/components/post_field.dart';
 import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/tools/post_report_page.dart';
 import 'package:nexus/pages/tools/user_chat_search_page.dart';
 
 class AdminChatPage extends StatefulWidget {
@@ -31,6 +32,12 @@ class _HomePageState extends State<AdminChatPage> {
   void initState() {
     super.initState();
     fetchUserData();
+  }
+
+  @override
+  void dispose() {
+    fetchUserData();
+    super.dispose();
   }
 
   //sign user out
@@ -100,20 +107,38 @@ class _HomePageState extends State<AdminChatPage> {
         actions: [
           // Display the menue
           PopupMenuButton(
-            icon: Icon(
-              Icons.more_vert,
-            ), // add this line
+            color: Colors.white,
+            icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
             itemBuilder: (_) => <PopupMenuItem<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'search_messages',
-                child: SizedBox(
-                  width: 100,
-                  // height: 30,
-
-                  child: Text(
-                    "tools",
-                    style: TextStyle(color: Colors.red),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.search, color: Colors.black),
+                    SizedBox(width: 5),
+                    Text(
+                      "Search message by email",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'reports',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.report, color: Colors.black),
+                    SizedBox(width: 5),
+                    Text(
+                      "Reports",
+                      style: TextStyle(color: Colors.black),
+                    )
+                  ],
                 ),
               ),
             ],
@@ -125,6 +150,15 @@ class _HomePageState extends State<AdminChatPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => UserPostsPage(),
+                    ),
+                  );
+                  break;
+                case 'reports':
+                  // go to profile page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReportPage(),
                     ),
                   );
                   break;
@@ -188,6 +222,7 @@ class _HomePageState extends State<AdminChatPage> {
                       obscureText: false,
                       imgFromGallery: () {},
                       imgFromCamera: () {},
+                      showMediaPicker: false,
                     ),
                   ),
 

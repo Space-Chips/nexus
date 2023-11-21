@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/challenge_components/challenge_widget.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
+import 'package:nexus/pages/tools/post_report.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:nexus/components/drawer.dart';
@@ -20,16 +21,16 @@ import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({
+class ReportPage extends StatefulWidget {
+  const ReportPage({
     super.key,
   });
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ReportPage> createState() => _ReportPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ReportPageState extends State<ReportPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final textController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
@@ -332,7 +333,7 @@ class _HomePageState extends State<HomePage> {
             filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
             child: AppBar(
               title: Text(
-                "N E X U S",
+                "R E P O R T S",
                 selectionColor: Theme.of(context).colorScheme.primary,
               ),
               centerTitle: true,
@@ -378,18 +379,14 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
-                      .collection('Posts')
-                      .orderBy('TimeStamp', descending: true)
+                      .collection('Reports')
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final allPosts = snapshot.data!.docs;
 
                       // Continue with your logic to filter posts based on blocked users (blockedUsersEmails)
-                      final filteredPosts = allPosts
-                          .where((post) =>
-                              !blockedUsersEmails.contains(post['UserEmail']))
-                          .toList();
+                      final filteredPosts = allPosts.toList();
 
                       return ListView.separated(
                         itemCount: filteredPosts.length + 1,
@@ -401,30 +398,18 @@ class _HomePageState extends State<HomePage> {
                             return Container(
                               margin:
                                   EdgeInsets.only(top: 25, left: 25, right: 25),
-                              child: ChallengeWidget(
-                                gamingTitle: gamingTitle,
-                                gaming: gaming,
-                                memeTitle: memeTitle,
-                                meme: meme,
-                                photoTitle: photoTitle,
-                                photo: photo,
-                                photoTime: photoTime,
-                              ),
+                              child: Text(
+                                  "Yet to come chat and user report toggle"),
                             );
                           }
 
                           final post = filteredPosts[index - 1];
-                          return WallPost(
-                            message: post['Message'],
-                            user: post['User'],
-                            userEmail: post['UserEmail'],
-                            isAdminPost: post['isAdminPost'],
-                            mediaDest: post['MediaDestination'],
-                            contextText: post['Context'],
+                          return PostReport(
                             postId: post.id,
-                            likes: List<String>.from(post['Likes'] ?? []),
-                            views: List<String>.from(post['Views'] ?? []),
-                            time: formatDate(post['TimeStamp']),
+                            reportedPostId: post['PostId'],
+                            reporter: post['Reporter'],
+                            reported: post['Reported'],
+                            detail: post['Detail'],
                           );
                         },
                       );
@@ -433,6 +418,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text('Error: ${snapshot.error}'),
                       );
                     }
+
                     return const Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),

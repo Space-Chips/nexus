@@ -46,6 +46,12 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
     getId();
   }
 
+  @override
+  void dispose() {
+    getId();
+    super.dispose();
+  }
+
   void signOut() {
     FirebaseAuth.instance.signOut();
   }

@@ -449,6 +449,7 @@ class _ChallengeWidgetState extends State<ChallengeWidget> {
                 obscureText: false,
                 imgFromGallery: imgFromGallery,
                 imgFromCamera: imgFromCamera,
+                showMediaPicker: true,
               ),
             ),
 

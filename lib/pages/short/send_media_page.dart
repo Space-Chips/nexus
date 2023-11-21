@@ -175,6 +175,7 @@ class _SendMediaPageState extends State<SendMediaPage> {
                       obscureText: false,
                       imgFromGallery: () {},
                       imgFromCamera: () {},
+                      showMediaPicker: true,
                     ),
                   ),
 

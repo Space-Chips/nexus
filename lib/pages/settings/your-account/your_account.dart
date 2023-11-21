@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:nexus/pages/home_page.dart';
 import 'package:nexus/pages/settings/your-account/account_information.dart';
 import 'package:nexus/pages/settings/your-account/change_password.dart';
+import 'package:nexus/pages/settings/your-account/delete_account.dart';
 import 'package:nexus/theme/dark_theme.dart';
 import 'package:nexus/theme/light_theme.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -69,7 +70,23 @@ class _YourAccountPageState extends State<YourAccountPage> {
                   .where("email", isEqualTo: currentUser.email)
                   .get();
 
+              final postDocs = await FirebaseFirestore.instance
+                  .collection("Posts")
+                  .where("email", isEqualTo: currentUser.email)
+                  .get();
+
+              final chatDocs = await FirebaseFirestore.instance
+                  .collection("Chat")
+                  .where("email", isEqualTo: currentUser.email)
+                  .get();
+
               for (var doc in userDocs.docs) {
+                await doc.reference.delete();
+              }
+              for (var doc in postDocs.docs) {
+                await doc.reference.delete();
+              }
+              for (var doc in chatDocs.docs) {
                 await doc.reference.delete();
               }
 
@@ -78,6 +95,7 @@ class _YourAccountPageState extends State<YourAccountPage> {
 
               // Dismiss the dialog
               Navigator.pop(context);
+              FirebaseAuth.instance.signOut();
             },
             child: Text("Y E S"),
           ),
@@ -179,6 +197,16 @@ class _YourAccountPageState extends State<YourAccountPage> {
     );
   }
 
+  // navigate to home page
+  void goToDeleteAccountPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeleteAccountPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -236,7 +264,7 @@ class _YourAccountPageState extends State<YourAccountPage> {
                 description: Text('Find out how to deactivate your account.'),
                 leading: Icon(CupertinoIcons.delete),
                 onPressed: (context) {
-                  showDeleteDialog();
+                  goToDeleteAccountPage();
                 },
               ),
             ],

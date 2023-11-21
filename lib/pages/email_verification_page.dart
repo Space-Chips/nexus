@@ -50,7 +50,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   @override
   void dispose() {
     timer?.cancel();
-
     super.dispose();
   }
 

@@ -154,6 +154,8 @@ class _RegisterPageState extends State<RegisterPage> {
         fontSize: 15,
         color: Theme.of(context).colorScheme.tertiary,
       ),
+      pickerTextStyle: TextStyle(
+          color: Theme.of(context).colorScheme.tertiary, fontSize: 15),
       buttonSingleColor: Theme.of(context).colorScheme.secondary,
       onSubmit: (index) async {
         setState(() {

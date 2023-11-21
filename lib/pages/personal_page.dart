@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexus/components/editable_text_box.dart';
 import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
@@ -18,10 +19,12 @@ class ProfilePageSettings extends StatefulWidget {
 }
 
 class _ProfilePageSettingsState extends State<ProfilePageSettings> {
+  late String updatedValue; // Declare updatedValue as a class-level variable
   late String username;
   late String address;
   late String website;
-  late String updatedValue; // Declare updatedValue as a class-level variable
+  late String email;
+
   late bool admin;
 
   // user
@@ -29,6 +32,22 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
 
   bool showPosts = true;
   bool isFollowing = false;
+  bool isBlocked = false;
+
+  var blockedUsersEmails = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+/*
+  @override
+  void dispose() {
+    super.dispose();
+    fetchUserData();
+    fetchPostData();
+  }*/
 
   // show an account deletition dialog
   void showDeleteDialog() {
@@ -41,20 +60,48 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
           TextButton(
             onPressed: () async {
               // Delete the user's data from Firestore
-              final userDocs = await FirebaseFirestore.instance
-                  .collection("users")
-                  .where("email", isEqualTo: currentUser.email)
-                  .get();
+              // show an account deletition dialog
+              try {
+                // Delete the user's data from Firestore
+                final userDocs = await FirebaseFirestore.instance
+                    .collection("users")
+                    .where("email", isEqualTo: currentUser.email)
+                    .get();
 
-              for (var doc in userDocs.docs) {
-                await doc.reference.delete();
+                final postDocs = await FirebaseFirestore.instance
+                    .collection("Posts")
+                    .where("UserEmail", isEqualTo: currentUser.email)
+                    .get();
+
+                final chatDocs = await FirebaseFirestore.instance
+                    .collection("Chat")
+                    .where("UserEmail", isEqualTo: currentUser.email)
+                    .get();
+
+                for (var doc in userDocs.docs) {
+                  await doc.reference.delete();
+                }
+                for (var doc in postDocs.docs) {
+                  await doc.reference.delete();
+                }
+                for (var doc in chatDocs.docs) {
+                  await doc.reference.delete();
+                }
+
+                // Delete the user account from Firebase Auth
+                await currentUser.delete();
+
+                // Dismiss the dialog
+                Navigator.pop(context);
+              } on FirebaseAuthException catch (e) {
+                Fluttertoast.showToast(
+                  msg: e.code,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                );
               }
-
-              // Delete the user account from Firebase Auth
-              await currentUser.delete();
-
-              // Dismiss the dialog
-              Navigator.pop(context);
             },
             child: Text("Y E S"),
           ),
@@ -208,6 +255,7 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
             }
 
             var userDocument = snapshot.data!.docs[0];
+            var email = userDocument['email'];
             username = userDocument['username'];
             address = userDocument['address'];
             website = userDocument['website'];
@@ -312,9 +360,11 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
-                                    userDocument['followers'].length == 1
-                                        ? 'follower'
-                                        : 'followers',
+                                    isBlocked
+                                        ? userDocument['followers'].length == 1
+                                            ? 'follower'
+                                            : 'followers'
+                                        : 'unblock',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(color: Colors.grey[700]),
                                   ),

@@ -35,6 +35,15 @@ class _AdPageState extends State<AdPage> {
     });
   }
 
+  @override
+  void dispose() {
+    _initBannerAd();
+    _initBannerAd2();
+    _initBannerAd3();
+    _initBannerAd4();
+    super.dispose();
+  }
+
   _initBannerAd() {
     _bannerAd = BannerAd(
       size: AdSize.banner,

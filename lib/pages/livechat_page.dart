@@ -34,6 +34,12 @@ class _HomePageState extends State<LiveChatPage> {
     fetchUserData();
   }
 
+  @override
+  void dispose() {
+    fetchUserData();
+    super.dispose();
+  }
+
   //sign user out
   void signOut() {
     FirebaseAuth.instance.signOut();
@@ -163,12 +169,12 @@ class _HomePageState extends State<LiveChatPage> {
                   // textfield
                   Expanded(
                     child: MyPostField(
-                      controller: textController,
-                      hintText: 'Postez votre rumeur...',
-                      obscureText: false,
-                      imgFromGallery: () {},
-                      imgFromCamera: () {},
-                    ),
+                        controller: textController,
+                        hintText: 'Postez votre rumeur...',
+                        obscureText: false,
+                        imgFromGallery: () {},
+                        imgFromCamera: () {},
+                        showMediaPicker: false),
                   ),
 
                   // post button

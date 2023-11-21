@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Comment extends StatefulWidget {
   final String text;
@@ -27,9 +29,9 @@ class Comment extends StatefulWidget {
 class _CommentState extends State<Comment> {
   bool isLiked = false;
   bool isAdminState = false;
-  String usernameState = "usernameState";
-  String userEmail = "userEmail";
-  String postUsername = "Test Username";
+  String usernameState = "[Deleted]";
+  String userEmail = "[Deleted]";
+  String postUsername = "[Deleted]";
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
@@ -51,6 +53,50 @@ class _CommentState extends State<Comment> {
     postRef.update({
       'Views': FieldValue.arrayUnion([currentUser.email])
     });
+  }
+
+// delete a post
+  void deletePost() {
+    // show a dialog box asking for confirmation
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("D E L E T E  P O S T"),
+        content: const Text(
+          "Are you sure you want to delete this post ???",
+          selectionColor: Colors.blue,
+        ),
+        actions: [
+          // CANCEL BUTTON
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "C A N C E L",
+              selectionColor: Colors.blue,
+            ),
+          ),
+
+          // DELETE BUTTON
+          TextButton(
+            onPressed: () async {
+              HapticFeedback.heavyImpact();
+
+              // Delete the current comment
+              await FirebaseFirestore.instance
+                  .collection("Posts")
+                  .doc(widget.postId)
+                  .collection("Comments")
+                  .doc(widget.commentId)
+                  .delete();
+
+              // dismiss the dialog
+              Navigator.pop(context);
+            },
+            child: const Text("D E L E T E"),
+          ),
+        ],
+      ),
+    );
   }
 
   // Fetch user data from Firebase
@@ -77,39 +123,59 @@ class _CommentState extends State<Comment> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary,
-        borderRadius: BorderRadius.circular(7),
-      ),
       margin: const EdgeInsets.only(bottom: 5),
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // comment
-          Text(widget.text),
-
-          const SizedBox(height: 5),
-
-          // user, time
-          Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(7), // Adjust the radius as needed
+        child: Slidable(
+          startActionPane: ActionPane(
+            motion: BehindMotion(),
             children: [
-              Text(
-                widget.usernameState,
-                style: TextStyle(color: Colors.grey[400]),
+              SlidableAction(
+                onPressed: ((context) {
+                  // delete post
+                  deletePost();
+                }),
+                icon: Icons.delete,
+                label: 'Delete',
+                backgroundColor: Colors.red,
               ),
-              Text(
-                "  ",
-                style: TextStyle(color: Colors.grey[400]),
-              ),
-              Text(
-                widget.time,
-                style: TextStyle(color: Colors.grey[400]),
-              ),
-              const SizedBox(width: 20),
             ],
           ),
-        ],
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // comment
+                Text(widget.text),
+
+                const SizedBox(height: 5),
+
+                // user, time
+                Row(
+                  children: [
+                    Text(
+                      widget.usernameState,
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                    Text(
+                      "  ",
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                    Text(
+                      widget.time,
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                    const SizedBox(width: 20),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

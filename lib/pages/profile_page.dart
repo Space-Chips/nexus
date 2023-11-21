@@ -42,6 +42,13 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchUserData();
   }
 
+  @override
+  void dispose() {
+    loadUserData();
+    fetchUserData();
+    super.dispose();
+  }
+
   // Get the user data
   void fetchUserData() async {
     QuerySnapshot userSnapshot = await FirebaseFirestore.instance

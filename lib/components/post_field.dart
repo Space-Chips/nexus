@@ -9,6 +9,7 @@ class MyPostField extends StatelessWidget {
   final Function()? imgFromCamera;
   final String hintText;
   final bool obscureText;
+  final bool showMediaPicker;
 
   const MyPostField({
     super.key,
@@ -17,6 +18,7 @@ class MyPostField extends StatelessWidget {
     required this.obscureText,
     required this.imgFromGallery,
     required this.imgFromCamera,
+    required this.showMediaPicker,
   });
 
   @override
@@ -46,61 +48,61 @@ class MyPostField extends StatelessWidget {
           ),
         ),
         // Display the menue
-
-        PopupMenuButton(
-          icon: Icon(Icons.add_rounded, color: Colors.grey[500]),
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(10.0), // Adjust the radius as needed
+        if (showMediaPicker == true)
+          PopupMenuButton(
+            icon: Icon(Icons.add_rounded, color: Colors.grey[500]),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(10.0), // Adjust the radius as needed
+            ),
+            itemBuilder: (_) => <PopupMenuItem<String>>[
+              const PopupMenuItem<String>(
+                value: 'imgFromGallery',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.image_outlined,
+                      color: Colors.black,
+                    ),
+                    SizedBox(width: 7),
+                    Text(
+                      "Add Image",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'imgFromCamera',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.photo_camera_outlined,
+                      color: Colors.black,
+                    ),
+                    SizedBox(width: 7),
+                    Text(
+                      "Take Image",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (index) async {
+              switch (index) {
+                case 'imgFromGallery':
+                  imgFromGallery!();
+                  break;
+                case 'imgFromCamera':
+                  imgFromCamera!();
+                  break;
+              }
+            },
           ),
-          itemBuilder: (_) => <PopupMenuItem<String>>[
-            const PopupMenuItem<String>(
-              value: 'imgFromGallery',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.image_outlined,
-                    color: Colors.black,
-                  ),
-                  SizedBox(width: 7),
-                  Text(
-                    "Add Image",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            const PopupMenuItem<String>(
-              value: 'imgFromCamera',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.photo_camera_outlined,
-                    color: Colors.black,
-                  ),
-                  SizedBox(width: 7),
-                  Text(
-                    "Take Image",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          onSelected: (index) async {
-            switch (index) {
-              case 'imgFromGallery':
-                imgFromGallery!();
-                break;
-              case 'imgFromCamera':
-                imgFromCamera!();
-                break;
-            }
-          },
-        ),
       ],
     );
   }

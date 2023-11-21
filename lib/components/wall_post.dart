@@ -14,7 +14,6 @@ import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/full_image_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:nexus/pages/profile_page.dart';
-
 import 'like_button.dart';
 
 class WallPost extends StatefulWidget {
@@ -59,6 +58,7 @@ class _WallPostState extends State<WallPost> {
   final commentTextController = TextEditingController();
   final reportTextController = TextEditingController();
   var commentTextcontrollerstring = "";
+  var blockedUsersEmails = [];
   var commentdata;
   late String mediaUrl = ""; // Initialize mediaUrl with an empty string
   final storage = FirebaseStorage.instance;
@@ -125,15 +125,21 @@ class _WallPostState extends State<WallPost> {
     if (userSnapshot.docs.isNotEmpty) {
       // Check if any documents match the query
       var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+      var blockedUsers = userData['blockedUsersEmails'];
       var username = userData['username'];
       var isAdmin = userData['admin'];
       var email = userData['email'];
 
       setState(() {
         // Update isAdmin and username in the state
+        blockedUsersEmails = blockedUsers;
         usernameState = username;
         isAdminState = isAdmin;
         userEmail = email;
+
+        if (blockedUsersEmails.contains(userEmail)) {
+          isBlocked = true;
+        }
       });
     } else {
       //print("User data not found");
@@ -298,14 +304,13 @@ class _WallPostState extends State<WallPost> {
     HapticFeedback.lightImpact();
 
     // store in firebase
-    FirebaseFirestore.instance.collection("Admin_Chat").add(
+
+    FirebaseFirestore.instance.collection("Reports").add(
       {
-        'User': usernameState,
-        'UserEmail': currentUser.email,
-        'Message': postText,
-        'TimeStamp': Timestamp.now(),
-        'isAdminPost': isAdminState,
-        'Likes': [],
+        'Reporter': userEmail,
+        'Reported': widget.userEmail,
+        'Detail': postText,
+        'PostId': widget.postId,
       },
     );
   }
@@ -418,9 +423,9 @@ class _WallPostState extends State<WallPost> {
             onPressed: () {
               if (reportTextController.text.isNotEmpty) {
                 // add coment
-                postReport(
-                    "⚠️REPORT⚠️ $userEmail just reported a post !! It reports ${widget.userEmail}, he says that ${reportTextController.text} / the post id is ${widget.postId} ");
-                // pop box
+                postReport(reportTextController.text);
+                //postReport(
+                //    "⚠️REPORT⚠️ $userEmail just reported a post !! It reports ${widget.userEmail}, he says that ${reportTextController.text} / the post id is ${widget.postId} ");
                 reportTextController.clear();
                 Navigator.pop(context);
               } else {
@@ -620,7 +625,6 @@ class _WallPostState extends State<WallPost> {
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.mediumImpact();
-
                           goToProfilePage(postUsername);
                         },
                         child: Text(

@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:nexus/pages/admin_chat.dart';
+import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/home_page.dart';
 
 class FullScreenImg extends StatefulWidget {
@@ -30,6 +30,11 @@ class _FullScreenImgState extends State<FullScreenImg> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void signOut() {
