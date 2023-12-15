@@ -11,10 +11,10 @@ import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/home_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  final String username;
+  final String email;
   const ProfilePage({
     super.key,
-    required this.username,
+    required this.email,
   });
 
   @override
@@ -33,6 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool showPosts = true;
   bool isFollowing = false;
   bool isAdminState = false;
+  String usernameState = "Loading...";
   late int followerCount;
 
   @override
@@ -70,13 +71,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> loadUserData() async {
     final docRef = FirebaseFirestore.instance
         .collection("users")
-        .where('username', isEqualTo: widget.username);
+        .where('email', isEqualTo: widget.email);
 
     final snapshot = await docRef.get();
 
     if (snapshot.docs.isNotEmpty) {
       var userDocument = snapshot.docs[0];
       setState(() {
+        usernameState = userDocument['username'];
         isFollowing = userDocument['followers'].contains(currentUser.email);
         followerCount = userDocument['followers'].length;
       });
@@ -143,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Access the document in Firebase using the document ID
     final userQuery = await FirebaseFirestore.instance
         .collection("users")
-        .where('username', isEqualTo: widget.username)
+        .where('email', isEqualTo: widget.email)
         .get();
 
     if (userQuery.docs.isNotEmpty) {
@@ -175,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     var docRef = FirebaseFirestore.instance
         .collection("users")
-        .where('username', isEqualTo: widget.username)
+        .where('email', isEqualTo: widget.email)
         .get();
 
     return Scaffold(
@@ -194,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     goToHomePage();
                   },
-                  child: Text(widget.username)),
+                  child: Text(usernameState)),
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
@@ -389,12 +391,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: MyTextBox(
-                  text: userDocument['bio'],
-                  sectionName: 'bio',
+              if (userDocument['bio'] != "")
+                SliverToBoxAdapter(
+                  child: MyTextBox(
+                    text: userDocument['bio'],
+                    sectionName: 'bio',
+                  ),
                 ),
-              ),
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
               SliverToBoxAdapter(
                 child: Padding(
@@ -445,7 +448,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ? StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection("Posts")
-                          .where('User', isEqualTo: widget.username)
+                          .where('UserEmail', isEqualTo: widget.email)
                           .orderBy("TimeStamp", descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {
@@ -500,7 +503,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   : StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection("Chat")
-                          .where('User', isEqualTo: widget.username)
+                          .where('UserEmail', isEqualTo: widget.email)
                           .orderBy("TimeStamp", descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {

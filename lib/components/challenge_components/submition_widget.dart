@@ -187,7 +187,7 @@ class _SubmitionWidgetState extends State<SubmitionWidget> {
       context,
       MaterialPageRoute(
         builder: (context) => ProfilePage(
-          username: username,
+          email: username,
         ),
       ),
     );

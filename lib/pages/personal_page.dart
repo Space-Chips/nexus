@@ -255,7 +255,6 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
             }
 
             var userDocument = snapshot.data!.docs[0];
-            var email = userDocument['email'];
             username = userDocument['username'];
             address = userDocument['address'];
             website = userDocument['website'];

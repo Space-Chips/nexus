@@ -89,10 +89,9 @@ class _RegisterPageState extends State<RegisterPage> {
         'bio': 'Empty bio...', // initial empty bio
         'first name': firstName,
         'last name': lastName,
-        'password': password,
         'userId': docId,
         'website': "",
-        'email': email,
+        'email': email.toLowerCase(),
         'points': 0,
         'age': age,
       });

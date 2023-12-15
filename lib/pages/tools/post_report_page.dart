@@ -8,15 +8,10 @@ import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nexus/components/challenge_components/challenge_widget.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
 import 'package:nexus/pages/tools/post_report.dart';
 import 'package:path/path.dart' as Path;
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:nexus/components/drawer.dart';
 import 'package:nexus/components/post_field.dart';
-import 'package:nexus/components/wall_post.dart';
-import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
@@ -183,9 +178,8 @@ class _ReportPageState extends State<ReportPage> {
           emailState = email;
         });
       }
-    } catch (e) {
-      print(e);
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   // Pick the image from gallery
@@ -245,7 +239,6 @@ class _ReportPageState extends State<ReportPage> {
       await ref.putData(compressedBytes);
     } catch (e) {
       // Handle the error
-      print('Error uploading file: $e');
     }
   }
 
@@ -351,22 +344,6 @@ class _ReportPageState extends State<ReportPage> {
           ),
         ),
       ),
-      drawer: MyDrawer(
-        onSearchTap: goToSearchPage,
-        onSignOut: signOut,
-        onProfileTap: goToProfilePage,
-        onLiveChatTap: goToLiveChatPage,
-        onAdminChatTap: goToAdminChatPage,
-        isAdmin: isAdminState,
-        onThemeTap: () {
-          Future.delayed(Duration(milliseconds: 5), () {
-            setState(() {
-              HapticFeedback.heavyImpact();
-              AdaptiveTheme.of(context).toggleThemeMode();
-            });
-          });
-        },
-      ),
       body: Center(
         child: GestureDetector(
           onHorizontalDragUpdate: (details) {
@@ -380,6 +357,7 @@ class _ReportPageState extends State<ReportPage> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('Reports')
+                      .orderBy('Timestamp', descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
@@ -399,7 +377,12 @@ class _ReportPageState extends State<ReportPage> {
                               margin:
                                   EdgeInsets.only(top: 25, left: 25, right: 25),
                               child: Text(
-                                  "Yet to come chat and user report toggle"),
+                                "Yet to come chat and user report toggle",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                             );
                           }
 

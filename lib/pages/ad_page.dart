@@ -19,7 +19,6 @@ class _AdPageState extends State<AdPage> {
   bool _isAdLoaded = false;
   bool _isAd2Loaded = false;
   bool _isAd3Loaded = false;
-  bool _isAd4Loaded = false;
 
   @override
   void initState() {
@@ -29,7 +28,7 @@ class _AdPageState extends State<AdPage> {
     _initBannerAd3();
     _initBannerAd4();
     // Start a timer to navigate to AuthPage after 3 seconds
-    Timer(const Duration(seconds: 5), () {
+    Timer(const Duration(seconds: 15), () {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const AuthPage()));
     });
@@ -101,9 +100,7 @@ class _AdPageState extends State<AdPage> {
       adUnitId: AdHelper.bannerAdUnitId4,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          setState(() {
-            _isAd4Loaded = true;
-          });
+          setState(() {});
         },
         onAdFailedToLoad: (ad, error) {},
       ),
@@ -153,24 +150,54 @@ class _AdPageState extends State<AdPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _isAdLoaded
-                                  ? SizedBox(
-                                      height: _bannerAd.size.height.toDouble(),
-                                      width: _bannerAd.size.width.toDouble(),
-                                      child: AdWidget(ad: _bannerAd),
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 5.0, bottom: 5.0),
+                                      child: SizedBox(
+                                        height:
+                                            _bannerAd.size.height.toDouble(),
+                                        width: _bannerAd.size.width.toDouble(),
+                                        child: ClipRRect(
+                                          // Round corners of the ad widget
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Adjust the radius as needed
+                                          child: AdWidget(ad: _bannerAd),
+                                        ),
+                                      ),
                                     )
                                   : const SizedBox(),
                               _isAd2Loaded
-                                  ? SizedBox(
-                                      height: _bannerAd2.size.height.toDouble(),
-                                      width: _bannerAd2.size.width.toDouble(),
-                                      child: AdWidget(ad: _bannerAd2),
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 5.0, bottom: 5.0),
+                                      child: SizedBox(
+                                        height:
+                                            _bannerAd2.size.height.toDouble(),
+                                        width: _bannerAd2.size.width.toDouble(),
+                                        child: ClipRRect(
+                                          // Round corners of the ad widget
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Adjust the radius as needed
+                                          child: AdWidget(ad: _bannerAd2),
+                                        ),
+                                      ),
                                     )
                                   : const SizedBox(),
                               _isAd3Loaded
-                                  ? SizedBox(
-                                      height: _bannerAd3.size.height.toDouble(),
-                                      width: _bannerAd3.size.width.toDouble(),
-                                      child: AdWidget(ad: _bannerAd3),
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 5.0, bottom: 5.0),
+                                      child: SizedBox(
+                                        height:
+                                            _bannerAd3.size.height.toDouble(),
+                                        width: _bannerAd3.size.width.toDouble(),
+                                        child: ClipRRect(
+                                          // Round corners of the ad widget
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Adjust the radius as needed
+                                          child: AdWidget(ad: _bannerAd3),
+                                        ),
+                                      ),
                                     )
                                   : const SizedBox(),
                               if (!_isAdLoaded && !_isAd2Loaded)

@@ -5,17 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nexus/components/comment.dart';
-import 'package:nexus/components/comment_button.dart';
-import 'package:nexus/components/community_notes.dart';
-import 'package:nexus/components/delete_button.dart';
-import 'package:nexus/components/text_field.dart';
 import 'package:nexus/components/wall_post.dart';
 import 'package:nexus/helper/helper_methods.dart';
-import 'package:nexus/pages/full_image_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:nexus/pages/profile_page.dart';
-import '../../components/like_button.dart';
 
 class PostReport extends StatefulWidget {
   final String reporter;
@@ -53,7 +45,7 @@ class _PostReportState extends State<PostReport> {
   var commentdata;
   late String mediaUrl = ""; // Initialize mediaUrl with an empty string
   final storage = FirebaseStorage.instance;
-  bool _isDisposed = false; // Add a flag to check if the widget is disposed
+// Add a flag to check if the widget is disposed
   bool isCommentDialogOpen = false;
   int commentNumber = 0;
 
@@ -69,7 +61,7 @@ class _PostReportState extends State<PostReport> {
 
   @override
   void dispose() {
-    _isDisposed = true; // Set the flag when the widget is disposed
+// Set the flag when the widget is disposed
     super.dispose();
   }
 
@@ -137,7 +129,7 @@ class _PostReportState extends State<PostReport> {
       context,
       MaterialPageRoute(
         builder: (context) => ProfilePage(
-          username: username,
+          email: username,
         ),
       ),
     );
@@ -397,10 +389,132 @@ class _PostReportState extends State<PostReport> {
                     .doc(widget.postId)
                     .delete();
 
+                FirebaseFirestore.instance
+                    .collection("Reports")
+                    .doc(widget.postId)
+                    .delete();
+
+                // dismiss the dialog
+//                Navigator.pop(context);
+              },
+              child: const Text("D E L E T E"))
+        ],
+      ),
+    );
+  }
+
+  // delete a post
+  void acceptReport() {
+    // show a dialog box asking for confirmation
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("A G R E E  R E P O R T"),
+        content: const Text(
+          "Are you sure you want to ruin this person's day?",
+          selectionColor: Colors.blue,
+        ),
+        actions: [
+          // CANCEL BUTTON
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "C A N C E L",
+              selectionColor: Colors.blue,
+            ),
+          ),
+
+          // DELETE BUTTON
+          TextButton(
+              onPressed: () async {
+                HapticFeedback.heavyImpact();
+
+                // delete the comments from firesotre first
+                // (if you only delete the post, the comments will still  be stored in firestore)
+                final commentDocs = await FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(widget.postId)
+                    .collection("Comments")
+                    .get();
+
+                for (var doc in commentDocs.docs) {
+                  await FirebaseFirestore.instance
+                      .collection("Posts")
+                      .doc(widget.reportedPostId)
+                      .collection("Comments")
+                      .doc(doc.id)
+                      .delete();
+                }
+                final userData = await FirebaseFirestore.instance
+                    .collection("User")
+                    .where('UserEmail', isEqualTo: widget.reported)
+                    .get();
+
+                if (userData.docs.isNotEmpty) {
+                  final confirmedReports = userData.docs[0]['username'] as int;
+
+                  await FirebaseFirestore.instance
+                      .collection("User")
+                      .doc(widget.reportedPostId)
+                      .update({'ConfirmedReports': confirmedReports});
+                }
+
+                // then delete the Post
+                FirebaseFirestore.instance
+                    .collection("Posts")
+                    .doc(widget.reportedPostId)
+                    .delete();
+
+                FirebaseFirestore.instance
+                    .collection("Reports")
+                    .doc(widget.postId)
+                    .delete();
+
                 // dismiss the dialog
                 Navigator.pop(context);
               },
-              child: const Text("D E L E T E"))
+              child: const Text("D I E"))
+        ],
+      ),
+    );
+  }
+
+  // delete a post
+  void declineReport() {
+    // show a dialog box asking for confirmation
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("D E C L I N E  R E P O R T"),
+        content: const Text(
+          "Are you sure you want to decline this report ?",
+          selectionColor: Colors.blue,
+        ),
+        actions: [
+          // CANCEL BUTTON
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "C A N C E L",
+              selectionColor: Colors.blue,
+            ),
+          ),
+
+          // DELETE BUTTON
+          TextButton(
+              onPressed: () async {
+                HapticFeedback.heavyImpact();
+
+                // Delete report
+                FirebaseFirestore.instance
+                    .collection("Reports")
+                    .doc(widget.postId)
+                    .delete();
+
+                // dismiss the dialog
+                Navigator.pop(context);
+              },
+              child: const Text("D E C L I N E"))
         ],
       ),
     );
@@ -418,125 +532,18 @@ class _PostReportState extends State<PostReport> {
         child: Column(
           children: [
             SizedBox(height: 25),
-            Text(widget.detail),
-            SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        goToProfilePage(widget.reported);
-                      },
-                      child: Text(
-                        widget.reporter,
-                        // usernamestate
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                    ),
-                    Text(
-                      "  ",
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        goToProfilePage(widget.reported);
-                      },
-                      child: Text(
-                        widget.reported,
-                        // usernamestate
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 10),
-
-                // Display the menue
-                PopupMenuButton(
-                  color: Colors.white,
-                  icon: Icon(Icons.more_vert, color: Colors.grey[500]),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: Text(
+                  widget.detail,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[400],
                   ),
-                  itemBuilder: (_) => <PopupMenuItem<String>>[
-                    PopupMenuItem<String>(
-                      value: 'report',
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.flag_outlined, color: Colors.black),
-                          SizedBox(width: 5),
-                          Text(
-                            "Report",
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'block_user',
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.block_outlined, color: Colors.black),
-                          SizedBox(width: 5),
-                          Text(
-                            isBlocked ? "Unblock User" : "Block User",
-                            style: TextStyle(color: Colors.black),
-                          )
-                        ],
-                      ),
-                    ),
-                    if (isAdminState == true)
-                      PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.delete_outlined, color: Colors.black),
-                            SizedBox(width: 5),
-                            Text(
-                              "Delete",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (isAdminState == true)
-                      PopupMenuItem<String>(
-                        value: 'add_context',
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.group, color: Colors.black),
-                            SizedBox(width: 5),
-                            Text(
-                              "Note",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                  onSelected: (index) async {
-                    switch (index) {
-                      case 'report':
-                        break;
-                      case 'add_context':
-                        break;
-                      case 'delete':
-                        break;
-                      case 'block_user':
-                        break;
-                    }
-                  },
-                )
-              ],
+                ),
+              ),
             ),
-            SizedBox(height: 5),
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
@@ -597,6 +604,142 @@ class _PostReportState extends State<PostReport> {
                   },
                 ),
               ),
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "reporter : ",
+                          // usernamestate
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () {
+                            goToProfilePage(widget.reporter);
+                          },
+                          child: Text(
+                            widget.reporter,
+                            // usernamestate
+                            style: TextStyle(color: Colors.grey[400]),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "  ",
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "reported : ",
+                          // usernamestate
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            goToProfilePage(widget.reported);
+                          },
+                          child: Text(
+                            widget.reported,
+                            // usernamestate
+                            style: TextStyle(color: Colors.grey[400]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 10),
+
+                // Display the menue
+                PopupMenuButton(
+                  color: Colors.white,
+                  icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  itemBuilder: (_) => <PopupMenuItem<String>>[
+                    PopupMenuItem<String>(
+                      value: 'Comming soon',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.developer_board, color: Colors.black),
+                          SizedBox(width: 5),
+                          Text(
+                            "Comming soon",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (index) async {
+                    switch (index) {
+                      case 'Comming soon':
+                        break;
+                    }
+                  },
+                )
+              ],
+            ),
+            SizedBox(height: 25),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    acceptReport();
+                  },
+                  child: Row(
+                    children: const [
+                      Text(
+                        "Approve",
+                        // usernamestate
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.check_rounded)
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () {
+                    declineReport();
+                  },
+                  child: Row(
+                    children: const [
+                      Text(
+                        "Disaprove",
+                        // usernamestate
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.block)
+                    ],
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 25),
           ],

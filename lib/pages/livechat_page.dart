@@ -170,7 +170,7 @@ class _HomePageState extends State<LiveChatPage> {
                   Expanded(
                     child: MyPostField(
                         controller: textController,
-                        hintText: 'Postez votre rumeur...',
+                        hintText: "Exprimez-vous ici...",
                         obscureText: false,
                         imgFromGallery: () {},
                         imgFromCamera: () {},

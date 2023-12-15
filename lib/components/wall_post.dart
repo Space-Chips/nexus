@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, avoid_print, prefer_typing_uninitialized_variables
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -189,7 +188,7 @@ class _WallPostState extends State<WallPost> {
       context,
       MaterialPageRoute(
         builder: (context) => ProfilePage(
-          username: username,
+          email: username,
         ),
       ),
     );
@@ -232,7 +231,7 @@ class _WallPostState extends State<WallPost> {
     Query query = usersRef.where("email", isEqualTo: currentUser.email);
 
     query.get().then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         // Get the specific DocumentReference
         DocumentReference documentRef = doc.reference;
 
@@ -247,7 +246,7 @@ class _WallPostState extends State<WallPost> {
             'blockedUsersEmails': FieldValue.arrayRemove([widget.userEmail])
           });
         }
-      });
+      }
     });
   }
 
@@ -299,7 +298,7 @@ class _WallPostState extends State<WallPost> {
     });
   }
 
-  // post message
+  // post report
   void postReport(String postText) {
     HapticFeedback.lightImpact();
 
@@ -311,6 +310,7 @@ class _WallPostState extends State<WallPost> {
         'Reported': widget.userEmail,
         'Detail': postText,
         'PostId': widget.postId,
+        'Timestamp': FieldValue.serverTimestamp(),
       },
     );
   }
@@ -407,45 +407,71 @@ class _WallPostState extends State<WallPost> {
     );
   }
 
-  // send a report message
+// Send a report message
   void showReportDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("R E P O R T"),
-        content: TextField(
-          controller: reportTextController,
-          decoration: InputDecoration(hintText: "Add details..."),
-        ),
-        actions: [
-          // save button
-          TextButton(
-            onPressed: () {
-              if (reportTextController.text.isNotEmpty) {
-                // add coment
-                postReport(reportTextController.text);
-                //postReport(
-                //    "⚠️REPORT⚠️ $userEmail just reported a post !! It reports ${widget.userEmail}, he says that ${reportTextController.text} / the post id is ${widget.postId} ");
-                reportTextController.clear();
-                Navigator.pop(context);
-              } else {
-                // pop box
-                commentTextController.clear();
-                Navigator.pop(context);
-              }
-            },
-            child: Text("S E N D"),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .background
+                .withOpacity(0.8), // Adjust opacity for the frosted effect
+            borderRadius: BorderRadius.circular(10),
           ),
-
-          // cancel button
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "C A N C E L",
-              selectionColor: Colors.blue,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: reportTextController,
+                  maxLength: 50,
+                  decoration: InputDecoration(
+                    hintText: "Add details (limit: 50 characters)...",
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        if (reportTextController.text.isNotEmpty) {
+                          postReport(reportTextController.text);
+                          reportTextController.clear();
+                          Navigator.pop(context);
+                        } else {
+                          // Display an error message or handle accordingly
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .tertiary, // Adjust button color
+                      ),
+                      child: Text(
+                        "S E N D",
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "C A N C E L",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ), // Adjust button color
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          )
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -625,7 +651,7 @@ class _WallPostState extends State<WallPost> {
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.mediumImpact();
-                          goToProfilePage(postUsername);
+                          goToProfilePage(widget.userEmail);
                         },
                         child: Text(
                           widget.user,
@@ -884,11 +910,12 @@ class _WallPostState extends State<WallPost> {
                               return Comment(
                                 text: commentData["CommentText"],
                                 user: commentData["CommentedBy"],
+                                email: commentData["CommentedByEmail"],
                                 usernameState: commentData["CommentedBy"],
                                 time: formatDate(commentData["CommentTime"]),
                                 postId: widget.postId,
-                                commentId: doc
-                                    .id, // Pass the comment document ID as commentId
+                                commentId: doc.id,
+                                isAdmin: isAdminState,
                               );
                             }).toList(),
                           )
@@ -924,10 +951,12 @@ class _WallPostState extends State<WallPost> {
                         return Comment(
                           text: commentData["CommentText"],
                           user: commentData["CommentedBy"],
+                          email: commentData["CommentedByEmail"],
                           usernameState: commentData["CommentedBy"],
                           time: formatDate(commentData["CommentTime"]),
                           postId: widget.postId,
                           commentId: doc.id,
+                          isAdmin: isAdminState,
                         );
                       }).toList();
 

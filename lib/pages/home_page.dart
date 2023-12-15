@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,14 +44,14 @@ class _HomePageState extends State<HomePage> {
   int subcollectionCount = 0;
   List<QueryDocumentSnapshot> allPosts = [];
 
-  late String photoTitle = "Initialisation Error";
-  late String photo = "Initialisation Error";
+  late String photoTitle = "Loading...";
+  late String photo = "Loading...";
   late Timestamp photoTime = Timestamp.now();
-  late String gamingTitle = "Initialisation Error";
-  late String gaming = "Initialisation Error";
+  late String gamingTitle = "Loading...";
+  late String gaming = "Loading...";
   late Timestamp gamingTime = Timestamp.now();
-  late String memeTitle = "Initialisation Error";
-  late String meme = "Initialisation Error";
+  late String memeTitle = "Loading...";
+  late String meme = "Loading...";
   late Timestamp memeTime = Timestamp.now();
 
   var blockedUsersEmails = [];
@@ -183,7 +184,7 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      print(e);
+      //
     }
   }
 
@@ -244,12 +245,11 @@ class _HomePageState extends State<HomePage> {
       await ref.putData(compressedBytes);
     } catch (e) {
       // Handle the error
-      print('Error uploading file: $e');
     }
   }
 
   void postMessage() async {
-    if (textController.text.isNotEmpty) {
+    if (textController.text.isNotEmpty && textController.text.length <= 200) {
       String? fileName;
 
       if (_photo != null) {
@@ -274,6 +274,27 @@ class _HomePageState extends State<HomePage> {
         _selectedImageWidget = Container();
         _photo = null;
       });
+    } else {
+      if (textController.text.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "Post can't be blank.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return;
+      }
+      if (textController.text.length >= 200) {
+        Fluttertoast.showToast(
+          msg: "Post limited to 200 characters.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return;
+      }
     }
   }
 

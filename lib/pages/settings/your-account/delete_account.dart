@@ -148,11 +148,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    var docRef = FirebaseFirestore.instance
-        .collection("users")
-        .where('email', isEqualTo: currentUser.email)
-        .get();
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       extendBodyBehindAppBar: true,
