@@ -4,5 +4,6 @@
         "commentdata",
         "formated"
     ],
-    "cmake.sourceDirectory": "/Users/abdelhaknezzari/Desktop/nexus app/windows/runner"
+    "cmake.sourceDirectory": "/Users/abdelhaknezzari/Desktop/nexus app/windows/runner",
+    "cloudcode.duetAI.inlineSuggestions.enableAuto": false
 }
