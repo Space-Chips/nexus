@@ -37,7 +37,15 @@ class MyEditableTextBox extends StatelessWidget {
                   // text
                   Row(
                     children: [
-                      Text(text),
+                      if (text != "" && text != " " && text != "   ")
+                        Text(text)
+                      else
+                        Text(
+                          "No data yet",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
                       // edit button
                     ],
                   ),

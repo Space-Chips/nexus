@@ -28,7 +28,7 @@ class _AdPageState extends State<AdPage> {
     _initBannerAd3();
     _initBannerAd4();
     // Start a timer to navigate to AuthPage after 3 seconds
-    Timer(const Duration(seconds: 15), () {
+    Timer(const Duration(seconds: 6), () {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const AuthPage()));
     });
@@ -142,7 +142,7 @@ class _AdPageState extends State<AdPage> {
                         Container(
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.secondary,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           margin: const EdgeInsets.only(bottom: 5),
                           padding: const EdgeInsets.all(15),

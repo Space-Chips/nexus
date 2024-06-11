@@ -417,7 +417,7 @@ class _WallPostState extends State<WallPost> {
           decoration: BoxDecoration(
             color: Theme.of(context)
                 .colorScheme
-                .background
+                .surface
                 .withOpacity(0.8), // Adjust opacity for the frosted effect
             borderRadius: BorderRadius.circular(10),
           ),

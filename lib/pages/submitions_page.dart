@@ -46,12 +46,6 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
     getId();
   }
 
-  @override
-  void dispose() {
-    getId();
-    super.dispose();
-  }
-
   void signOut() {
     FirebaseAuth.instance.signOut();
   }
@@ -86,7 +80,7 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -110,7 +104,7 @@ class _SubmitionsPageState extends State<SubmitionsPage> {
               centerTitle: true,
               elevation: 0.0,
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
               actions: [
                 IconButton(
                   onPressed: signOut,

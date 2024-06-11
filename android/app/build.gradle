@@ -15,12 +15,12 @@ if (localPropertiesFile.exists()) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '15'
+    flutterVersionCode = '16'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.15'
+    flutterVersionName = '1.16'
 }
 
    def keystoreProperties = new Properties()
@@ -33,6 +33,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.nexus"
+    compileSdkVersion 34
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

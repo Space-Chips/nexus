@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -359,7 +359,7 @@ class _HomePageState extends State<HomePage> {
               centerTitle: true,
               elevation: 0.0,
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
               actions: [
                 IconButton(
                   onPressed: signOut,

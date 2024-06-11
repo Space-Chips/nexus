@@ -181,7 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .get();
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: false,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -206,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               elevation: 0.0,
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
             ),
           ),
         ),
@@ -344,17 +344,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                   },
                                   style: ButtonStyle(
                                     backgroundColor:
-                                        MaterialStateProperty.all<Color>(
+                                        WidgetStateProperty.all<Color>(
                                       isFollowing ? Colors.white : Colors.blue,
                                     ),
-                                    padding: MaterialStateProperty.all<
+                                    padding: WidgetStateProperty.all<
                                         EdgeInsetsGeometry>(
                                       EdgeInsets.symmetric(
                                         vertical: 5,
                                         horizontal: 10,
                                       ),
                                     ),
-                                    shape: MaterialStateProperty.all<
+                                    shape: WidgetStateProperty.all<
                                         RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),

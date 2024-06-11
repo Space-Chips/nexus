@@ -222,7 +222,7 @@ class _YourAccountPageState extends State<YourAccountPage> {
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: SettingsList(
         lightTheme: lightSettingsTheme,

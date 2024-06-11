@@ -92,6 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'userId': docId,
         'website': "",
         'email': email.toLowerCase(),
+        'confirmedReports': 0,
         'points': 0,
         'age': age,
       });
@@ -146,12 +147,14 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     BottomPicker.date(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      title: "Set your Birthday",
-      titleStyle: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 15,
-        color: Theme.of(context).colorScheme.tertiary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      pickerTitle: Text(
+        "Set your Birthday",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
       ),
       pickerTextStyle: TextStyle(
           color: Theme.of(context).colorScheme.tertiary, fontSize: 15),

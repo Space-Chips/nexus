@@ -30,7 +30,6 @@ class _ReportPageState extends State<ReportPage> {
   final textController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _photo;
-  Widget _selectedImageWidget = Container();
   bool isAdminState = false;
   String usernameState =
       "Test Username (please contact me on play store in case you see this)";
@@ -190,7 +189,6 @@ class _ReportPageState extends State<ReportPage> {
       if (pickedFile != null) {
         _photo = File(pickedFile.path);
         uploadFile();
-        _selectedImageWidget = Image.file(_photo!);
       }
     });
   }
@@ -265,7 +263,6 @@ class _ReportPageState extends State<ReportPage> {
       textController.clear();
 
       setState(() {
-        _selectedImageWidget = Container();
         _photo = null;
       });
     }
@@ -314,7 +311,7 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -332,7 +329,7 @@ class _ReportPageState extends State<ReportPage> {
               centerTitle: true,
               elevation: 0.0,
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
               actions: [
                 IconButton(
                   onPressed: signOut,
@@ -410,61 +407,6 @@ class _ReportPageState extends State<ReportPage> {
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(25.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: MyPostField(
-                        controller: textController,
-                        hintText: "Post a message...",
-                        obscureText: false,
-                        imgFromGallery: imgFromGallery,
-                        imgFromCamera: imgFromCamera,
-                        showMediaPicker: true,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: postMessage,
-                      icon: const Icon(Icons.arrow_circle_up),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 25),
-                child: Text("Logged in as: ${currentUser.email!}"),
-              ),
-              if (_photo != null)
-                _selectedImageWidget = Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(25.0),
-                          child: _selectedImageWidget,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 10.0,
-                      left: 10.0,
-                      child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedImageWidget = Container();
-                            _photo = null;
-                          });
-                        },
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ),
-                  ],
-                ),
               if (_photo != null) SizedBox(height: 10),
             ],
           ),

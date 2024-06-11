@@ -22,7 +22,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
         centerTitle: true,
         elevation: 0,
       ),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
           // Search Bar

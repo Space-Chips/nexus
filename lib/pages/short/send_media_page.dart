@@ -86,10 +86,10 @@ class _SendMediaPageState extends State<SendMediaPage> {
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
       body: Center(

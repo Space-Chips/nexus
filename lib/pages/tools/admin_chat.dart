@@ -95,14 +95,14 @@ class _HomePageState extends State<AdminChatPage> {
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(
           "A D M I N  C H A T",
           selectionColor: Theme.of(context).colorScheme.primary,
         ),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         actions: [
           // Display the menue

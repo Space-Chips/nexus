@@ -211,7 +211,7 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
         .get();
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -238,7 +238,7 @@ class _ProfilePageSettingsState extends State<ProfilePageSettings> {
               elevation: 0.0,
               // backgroundColor: Colors.black.withOpacity(0.2),
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
             ),
           ),
         ),

@@ -445,18 +445,21 @@ class _PostReportState extends State<PostReport> {
                       .doc(doc.id)
                       .delete();
                 }
-                final userData = await FirebaseFirestore.instance
-                    .collection("User")
-                    .where('UserEmail', isEqualTo: widget.reported)
+                final userDataQuery = await FirebaseFirestore.instance
+                    .collection("users")
+                    .where('email', isEqualTo: widget.reporter)
                     .get();
 
-                if (userData.docs.isNotEmpty) {
-                  final confirmedReports = userData.docs[0]['username'] as int;
+                if (userDataQuery.docs.isNotEmpty) {
+                  final userDataDoc = userDataQuery.docs[0];
+                  final confirmedReports = userDataDoc['confirmedReports'] + 1;
 
-                  await FirebaseFirestore.instance
-                      .collection("User")
-                      .doc(widget.reportedPostId)
-                      .update({'ConfirmedReports': confirmedReports});
+                  // Get the document reference and update the field
+                  final userDocRef = FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(userDataDoc.id);
+                  await userDocRef
+                      .update({'confirmedReports': confirmedReports + 1});
                 }
 
                 // then delete the Post

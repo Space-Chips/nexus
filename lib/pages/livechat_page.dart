@@ -93,7 +93,7 @@ class _HomePageState extends State<LiveChatPage> {
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: Size(
@@ -113,7 +113,7 @@ class _HomePageState extends State<LiveChatPage> {
               elevation: 0.0,
               // backgroundColor: Colors.black.withOpacity(0.2),
               backgroundColor:
-                  Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
             ),
           ),
         ),
