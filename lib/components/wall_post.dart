@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, avoid_print, prefer_typing_uninitialized_variables
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -418,8 +419,8 @@ class _WallPostState extends State<WallPost> {
             color: Theme.of(context)
                 .colorScheme
                 .surface
-                .withOpacity(0.8), // Adjust opacity for the frosted effect
-            borderRadius: BorderRadius.circular(10),
+                .withOpacity(1), // Adjust opacity for the frosted effect
+            borderRadius: BorderRadius.circular(15),
           ),
           child: Padding(
             padding: const EdgeInsets.all(15.0),
@@ -476,102 +477,172 @@ class _WallPostState extends State<WallPost> {
     );
   }
 
-  // send a report message
+// Add context to a post
   void showContextDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("C O N T E X T"),
-        content: TextField(
-          controller: reportTextController,
-          decoration: InputDecoration(hintText: "Add details..."),
-        ),
-        actions: [
-          // save button
-          TextButton(
-            onPressed: () {
-              if (reportTextController.text.isNotEmpty) {
-                // add coment
-                postContext(reportTextController.text);
-                // pop box
-                reportTextController.clear();
-                Navigator.pop(context);
-              } else {
-                // pop box
-                commentTextController.clear();
-                Navigator.pop(context);
-              }
-            },
-            child: Text("S E N D"),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surface
+                .withOpacity(1), // Adjust opacity for the frosted effect
+            borderRadius: BorderRadius.circular(15),
           ),
-
-          // cancel button
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "C A N C E L",
-              selectionColor: Colors.blue,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: reportTextController,
+                  decoration: InputDecoration(
+                    hintText: "Add details here...",
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        if (reportTextController.text.isNotEmpty) {
+                          // add coment
+                          postContext(reportTextController.text);
+                          // pop box
+                          reportTextController.clear();
+                          Navigator.pop(context);
+                        } else {
+                          // pop box
+                          commentTextController.clear();
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .tertiary, // Adjust button color
+                      ),
+                      child: Text(
+                        "S E N D",
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "C A N C E L",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ), // Adjust button color
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Remember, community notes have no delete button. Proceed with caution",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
             ),
-          )
-        ],
+          ),
+        ),
       ),
     );
   }
 
   // delete a post
   void deletePost() {
-    // show a dialog box asking for confirmation
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("D E L E T E  P O S T"),
-        content: const Text(
-          "Are you sure you want to delete this post ???",
-          selectionColor: Colors.blue,
-        ),
-        actions: [
-          // CANCEL BUTTON
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "C A N C E L",
-              selectionColor: Colors.blue,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surface
+                .withOpacity(1), // Adjust opacity for the frosted effect
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 10),
+                Text(
+                  "ARE YOU SURE YOU WANT TO DELETE THIS POST ?",
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // DELETE BUTTON
+                    ElevatedButton(
+                      onPressed: () async {
+                        HapticFeedback.heavyImpact();
+
+                        // delete the comments from firesotre first
+                        // (if you only delete the post, the comments will still  be stored in firestore)
+                        final commentDocs = await FirebaseFirestore.instance
+                            .collection("Users")
+                            .doc(widget.postId)
+                            .collection("Comments")
+                            .get();
+
+                        for (var doc in commentDocs.docs) {
+                          await FirebaseFirestore.instance
+                              .collection("Posts")
+                              .doc(widget.postId)
+                              .collection("Comments")
+                              .doc(doc.id)
+                              .delete();
+                        }
+
+                        // then delete the Post
+                        FirebaseFirestore.instance
+                            .collection("Posts")
+                            .doc(widget.postId)
+                            .delete();
+
+                        // dismiss the dialog
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .tertiary, // Adjust button color
+                      ),
+                      child: Text(
+                        "D E L E T E",
+                      ),
+                    ),
+
+                    // CANCEL BUTTON
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "C A N C E L",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ), // Adjust button color
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-
-          // DELETE BUTTON
-          TextButton(
-              onPressed: () async {
-                HapticFeedback.heavyImpact();
-
-                // delete the comments from firesotre first
-                // (if you only delete the post, the comments will still  be stored in firestore)
-                final commentDocs = await FirebaseFirestore.instance
-                    .collection("Users")
-                    .doc(widget.postId)
-                    .collection("Comments")
-                    .get();
-
-                for (var doc in commentDocs.docs) {
-                  await FirebaseFirestore.instance
-                      .collection("Posts")
-                      .doc(widget.postId)
-                      .collection("Comments")
-                      .doc(doc.id)
-                      .delete();
-                }
-
-                // then delete the Post
-                FirebaseFirestore.instance
-                    .collection("Posts")
-                    .doc(widget.postId)
-                    .delete();
-
-                // dismiss the dialog
-                Navigator.pop(context);
-              },
-              child: const Text("D E L E T E"))
-        ],
+        ),
       ),
     );
   }
@@ -585,7 +656,7 @@ class _WallPostState extends State<WallPost> {
         builder: (context) => FullScreenImg(
           photoUrl: mediaUrl,
           message: widget.message,
-          username: widget.user,
+          username: postUsername,
           timeStamp: widget.time,
         ),
       ),
@@ -609,6 +680,7 @@ class _WallPostState extends State<WallPost> {
               child: GestureDetector(
                 onTap: () {
                   openFullScreenPage();
+                  print(widget.mediaDest);
                 },
                 child: SizedBox(
                   child: ClipRRect(
@@ -617,10 +689,7 @@ class _WallPostState extends State<WallPost> {
                       imageUrl: mediaUrl,
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
-                      errorWidget: (context, url, error) {
-                        // Show the loading indicator in case of an error
-                        return CircularProgressIndicator();
-                      },
+                      errorWidget: (context, url, error) => Icon(Icons.error),
                     ),
                   ),
                 ),
@@ -654,7 +723,7 @@ class _WallPostState extends State<WallPost> {
                           goToProfilePage(widget.userEmail);
                         },
                         child: Text(
-                          widget.user,
+                          postUsername,
                           // usernamestate
                           style: TextStyle(color: Colors.grey[400]),
                         ),
@@ -836,7 +905,7 @@ class _WallPostState extends State<WallPost> {
 
               // delete button
 
-              if (widget.user == usernameState) DeleteButton(onTap: deletePost)
+              if (postUsername == usernameState) DeleteButton(onTap: deletePost)
             ],
           ),
           AnimatedSwitcher(
@@ -935,12 +1004,7 @@ class _WallPostState extends State<WallPost> {
                     builder: (context, snapshot) {
                       // Show loading circle if no data yet
                       if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
-                          ),
-                        );
+                        return Center();
                       }
 
                       final comments = snapshot.data!.docs.map((doc) {

@@ -338,6 +338,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void goToGroupChatPage() {
+    Navigator.pop(context);
+    //Navigator.push(context
+    // MaterialPageRoute(
+    //builder: (context) => const GetStarted(),
+    // ),
+    //   );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -377,6 +386,7 @@ class _HomePageState extends State<HomePage> {
         onProfileTap: goToProfilePage,
         onLiveChatTap: goToLiveChatPage,
         onAdminChatTap: goToAdminChatPage,
+        onGroupChatTap: goToGroupChatPage,
         isAdmin: isAdminState,
         onThemeTap: () {
           Future.delayed(Duration(milliseconds: 5), () {

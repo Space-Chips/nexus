@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nexus/auth/policy_dialog.dart';
 import 'package:nexus/components/button.dart';
@@ -60,8 +61,17 @@ class _RegisterPageState extends State<RegisterPage> {
       if (age >= 116) {
         displayMessage("No, you're not the oldest person alive.");
       } else if (age == 69) {
-        displayMessage("69... Seriously?");
         signUp();
+
+        Fluttertoast.showToast(
+            msg: "69... Seriously?",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        displayMessage("69... Seriously?");
       } else {
         signUp();
       }
@@ -146,45 +156,24 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    BottomPicker.date(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      pickerTitle: Text(
-        "Set your Birthday",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-          color: Theme.of(context).colorScheme.tertiary,
-        ),
-      ),
-      pickerTextStyle: TextStyle(
-          color: Theme.of(context).colorScheme.tertiary, fontSize: 15),
-      buttonSingleColor: Theme.of(context).colorScheme.secondary,
-      onSubmit: (index) async {
-        setState(() {
-          timestamp = index;
-          wasBirthdayPicked = true;
-        });
+    try {
+      // Create user
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailTextController.text.trim(),
+        password: passwordTextController.text.trim(),
+      );
 
-        try {
-          // Create user
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: emailTextController.text.trim(),
-            password: passwordTextController.text.trim(),
-          );
-
-          // If user creation is successful, add user details
-          addUsersDetails(
-            firstnameTextController.text.trim(),
-            lastnameTextController.text.trim(),
-            passwordTextController.text.trim(),
-            emailTextController.text.trim(),
-            int.parse(ageTextController.text.trim()),
-          );
-        } on FirebaseAuthException catch (e) {
-          displayMessage(e.code);
-        }
-      },
-    ).show(context);
+      // If user creation is successful, add user details
+      addUsersDetails(
+        firstnameTextController.text.trim(),
+        lastnameTextController.text.trim(),
+        passwordTextController.text.trim(),
+        emailTextController.text.trim(),
+        int.parse(ageTextController.text.trim()),
+      );
+    } on FirebaseAuthException catch (e) {
+      displayMessage(e.code);
+    }
   }
 
   // display a dialog message
@@ -195,9 +184,11 @@ class _RegisterPageState extends State<RegisterPage> {
         title: Text(
           message,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color: const Color.fromARGB(255, 0, 0, 0), fontSize: 20),
         ),
-        backgroundColor: Colors.white.withOpacity(0.1),
+        backgroundColor:
+            const Color.fromARGB(255, 255, 255, 255).withOpacity(1),
       ),
     );
   }
@@ -292,7 +283,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   // sign in button
                   MyButton(
-                    onTap: signUp,
+                    onTap: checkSignUp,
                     text: 'Sign Up',
                   ),
                   const SizedBox(height: 25),

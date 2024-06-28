@@ -42,3 +42,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+upload_certificate.pem
+pubspec.lock
+flutter_jank_metrics_02.json
+flutter_jank_metrics_01.json
+.metadata

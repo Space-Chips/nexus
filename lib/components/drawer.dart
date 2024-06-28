@@ -4,12 +4,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:nexus/components/my_list_tile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MyDrawer extends StatelessWidget {
+class MyDrawer extends StatefulWidget {
   final void Function()? onSearchTap;
   final void Function()? onProfileTap;
   final void Function()? onLiveChatTap;
   final void Function()? onAdminChatTap;
+  final void Function()? onGroupChatTap;
   final void Function()? onSignOut;
   final void Function()? onThemeTap;
   final bool isAdmin;
@@ -19,10 +21,137 @@ class MyDrawer extends StatelessWidget {
     required this.onProfileTap,
     required this.onLiveChatTap,
     required this.onAdminChatTap,
+    required this.onGroupChatTap,
     required this.onSignOut,
     required this.onThemeTap,
     required this.isAdmin,
   });
+
+  @override
+  _MyDrawerState createState() => _MyDrawerState();
+}
+
+class _MyDrawerState extends State<MyDrawer> {
+  late List<String> _drawerItemOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDrawerItemOrder();
+  }
+
+  void _loadDrawerItemOrder() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _drawerItemOrder = prefs.getStringList('drawerItemOrder') ??
+          [
+            'HOME',
+            'SEARCH',
+            'PROFILE',
+            'THEME',
+            'LIVE CHAT',
+            'ADMIN CHAT',
+            'TEAMS'
+          ];
+    });
+  }
+
+  void _saveDrawerItemOrder() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('drawerItemOrder', _drawerItemOrder);
+  }
+
+  List<Widget> _buildDrawerItems() {
+    Map<String, Widget> itemMap = {
+      'HOME': MyListTile(
+        key: ValueKey('HOME'),
+        icon: Icons.home_rounded,
+        text: 'H O M E',
+        onTap: () => Navigator.pop(context),
+      ),
+      'SEARCH': MyListTile(
+        key: ValueKey('SEARCH'),
+        icon: Icons.search_outlined,
+        text: 'S E A R C H',
+        onTap: widget.onSearchTap,
+      ),
+      'PROFILE': MyListTile(
+        key: UniqueKey(),
+        icon: Icons.person_rounded,
+        text: 'P R O F I L E',
+        onTap: widget.onProfileTap,
+      ),
+      'THEME': MyListTile(
+        key: UniqueKey(),
+        icon: Icons.bedtime_rounded,
+        text: 'T H E M E',
+        onTap: widget.onThemeTap,
+      ),
+      'LIVE CHAT': MyListTile(
+        key: UniqueKey(),
+        icon: Icons.chat,
+        text: 'L I V E  C H A T',
+        onTap: widget.onLiveChatTap,
+      ),
+      if (widget.isAdmin)
+        'ADMIN CHAT': MyListTile(
+          key: UniqueKey(),
+          icon: Icons.shield_rounded,
+          text: 'A D M I N  C H A T',
+          onTap: widget.onAdminChatTap,
+        ),
+      'TEAMS': Padding(
+        key: UniqueKey(),
+        padding: const EdgeInsets.only(left: 10.0),
+        child: ExpansionTile(
+          leading: Icon(
+            Icons.group,
+            color: Colors.white,
+          ),
+          title: Text(
+            'T E A M S',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListTile(
+                title: Text(
+                  'MY TEAMS',
+                  style: TextStyle(
+                    // fontFamily: 'Times New Roman',
+                    color: Colors.white,
+                  ),
+                ),
+                onTap: () {
+                  // Handle tap
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListTile(
+                title: Text(
+                  'EXPLORE TEAMS',
+                  style: TextStyle(
+                    //fontFamily: 'Times New Roman',
+                    color: Colors.white,
+                  ),
+                ),
+                onTap: () {
+                  // Handle tap
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    };
+
+    return _drawerItemOrder.map((itemKey) => itemMap[itemKey]!).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,63 +161,45 @@ class MyDrawer extends StatelessWidget {
         child: Drawer(
           backgroundColor: Colors.grey[900]?.withOpacity(0.1),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                children: [
-                  DrawerHeader(
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 64,
-                    ),
-                  ),
-
-                  // home list tile
-                  MyListTile(
-                    icon: Icons.home_rounded,
-                    text: 'H O M E',
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  // profile sarch list tile
-                  MyListTile(
-                    icon: Icons.search_outlined,
-                    text: 'S E A R C H',
-                    onTap: onSearchTap,
-                  ),
-
-                  // profile list tile
-                  MyListTile(
-                    icon: Icons.person_rounded,
-                    text: 'P R O F I L E',
-                    onTap: onProfileTap,
-                  ),
-                  MyListTile(
-                    icon: Icons.bedtime_rounded,
-                    text: 'T H E M E',
-                    onTap: onThemeTap,
-                  ),
-                  MyListTile(
-                    icon: Icons.chat,
-                    text: 'L I V E  C H A T',
-                    onTap: onLiveChatTap,
-                  ),
-                  if (isAdmin == true)
-                    MyListTile(
-                      icon: Icons.shield_rounded,
-                      text: 'A D M I N  C H A T',
-                      onTap: onAdminChatTap,
-                    ),
-                ],
+              DrawerHeader(
+                child: Icon(Icons.person, color: Colors.white, size: 64),
               ),
-
-              // logout list tile
+              Expanded(
+                child: ReorderableListView(
+                  children: _buildDrawerItems(),
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final String item = _drawerItemOrder.removeAt(oldIndex);
+                      _drawerItemOrder.insert(newIndex, item);
+                      _saveDrawerItemOrder();
+                    });
+                  },
+                  proxyDecorator:
+                      (Widget child, int index, Animation<double> animation) {
+                    return AnimatedBuilder(
+                      animation: animation,
+                      builder: (BuildContext context, Widget? child) {
+                        return Material(
+                          color: Colors.transparent,
+                          elevation: 0,
+                          child: child,
+                        );
+                      },
+                      child: child,
+                    );
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 25.0),
                 child: MyListTile(
                   icon: Icons.logout_rounded,
                   text: 'L O G O U T',
-                  onTap: onSignOut,
+                  onTap: widget.onSignOut,
                 ),
               ),
             ],

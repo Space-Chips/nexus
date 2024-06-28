@@ -11,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
 import 'package:nexus/pages/tools/post_report.dart';
 import 'package:path/path.dart' as Path;
-import 'package:nexus/components/post_field.dart';
 import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
