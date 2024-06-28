@@ -1,6 +1,6 @@
-# nexus
+# N E X U S
 
-A new Flutter project.
+An open source Social media
 
 ## Getting Started
 
