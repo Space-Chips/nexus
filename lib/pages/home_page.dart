@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/challenge_components/challenge_widget.dart';
+import 'package:nexus/pages/group_chat/chat_home_page.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -340,11 +341,12 @@ class _HomePageState extends State<HomePage> {
 
   void goToGroupChatPage() {
     Navigator.pop(context);
-    //Navigator.push(context
-    // MaterialPageRoute(
-    //builder: (context) => const GetStarted(),
-    // ),
-    //   );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChatHomePage(),
+      ),
+    );
   }
 
   @override

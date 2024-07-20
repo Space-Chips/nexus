@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nexus/components/my_list_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,6 +29,7 @@ class MyDrawer extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _MyDrawerState createState() => _MyDrawerState();
 }
 
@@ -125,9 +127,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     color: Colors.white,
                   ),
                 ),
-                onTap: () {
-                  // Handle tap
-                },
+                onTap: widget.onGroupChatTap,
               ),
             ),
             Padding(
@@ -169,6 +169,8 @@ class _MyDrawerState extends State<MyDrawer> {
                 child: ReorderableListView(
                   children: _buildDrawerItems(),
                   onReorder: (oldIndex, newIndex) {
+                    HapticFeedback.selectionClick();
+
                     setState(() {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
