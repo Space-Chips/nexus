@@ -29,6 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
+  final usernameTextController = TextEditingController();
   final confirmpasswordTextController = TextEditingController();
   final firstnameTextController = TextEditingController();
   final lastnameTextController = TextEditingController();
@@ -40,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     emailTextController.dispose();
     passwordTextController.dispose();
+    usernameTextController.dispose();
     confirmpasswordTextController.dispose();
     firstnameTextController.dispose();
     lastnameTextController.dispose();
@@ -78,10 +80,9 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void pickAge(String text) {}
   Future signUp() async {
     Future addUsersDetails(String firstName, String lastName, String password,
-        String email, int age) async {
+        String email, int age, String username) async {
       final docRef = FirebaseFirestore.instance
           .collection('users')
           .doc(); // Create a new document reference with an automatically generated ID
@@ -95,7 +96,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'joinDate': Timestamp.now(),
         'birthday': timestamp,
         'relationshipStatus': "Single and loving it",
-        'username': emailTextController.text.split('@')[0], // initial username
+        'username': username, // initial username
         'bio': 'Empty bio...', // initial empty bio
         'first name': firstName,
         'last name': lastName,
@@ -139,20 +140,9 @@ class _RegisterPageState extends State<RegisterPage> {
           "Your name, please! We promise we won't call you Anonymous.");
       return;
     }
-    if (passwordTextController.text.isEmpty) {
-      // pop loading circle
-      //Navigator.pop(context);
-      // show error to the user
-      displayMessage("Enter a valid password.");
-      return;
-    }
+
     if (ageTextController.text.isEmpty) {
       displayMessage("Please enter a valid age.");
-      return;
-    }
-
-    if (emailTextController.text.isEmpty) {
-      displayMessage("Enter a valid email");
       return;
     }
 
@@ -168,8 +158,9 @@ class _RegisterPageState extends State<RegisterPage> {
         firstnameTextController.text.trim(),
         lastnameTextController.text.trim(),
         passwordTextController.text.trim(),
-        emailTextController.text.trim(),
+        usernameTextController.text.trim(),
         int.parse(ageTextController.text.trim()),
+        emailTextController.text.trim(),
       );
     } on FirebaseAuthException catch (e) {
       displayMessage(e.code);
@@ -241,6 +232,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: firstnameTextController,
                     hintText: 'First Name',
                     obscureText: false,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 24),
 
@@ -248,6 +241,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: lastnameTextController,
                     hintText: 'Last Name',
                     obscureText: false,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 24),
 
@@ -255,6 +250,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: ageTextController,
                     hintText: 'Age',
                     obscureText: false,
+                    maxLength: 0,
+                    isText: false,
                   ),
                   const SizedBox(height: 24),
 
@@ -263,6 +260,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: emailTextController,
                     hintText: 'Email',
                     obscureText: false,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 24),
 
@@ -271,6 +270,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: passwordTextController,
                     hintText: 'Password',
                     obscureText: true,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 24),
 
@@ -278,6 +279,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: confirmpasswordTextController,
                     hintText: 'Confirm Password',
                     obscureText: true,
+                    maxLength: 0,
+                    isText: true,
+                  ),
+                  const SizedBox(height: 24),
+
+                  MyTextField(
+                    controller: usernameTextController,
+                    hintText: 'Username',
+                    obscureText: false,
+                    maxLength: 18,
+                    isText: true,
                   ),
                   const SizedBox(height: 24),
 

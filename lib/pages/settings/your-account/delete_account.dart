@@ -197,6 +197,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 controller: emailTextController,
                 hintText: 'Enter your password',
                 obscureText: true,
+                maxLength: 0,
+                isText: true,
               ),
 
               SizedBox(

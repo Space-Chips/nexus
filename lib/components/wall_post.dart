@@ -953,6 +953,8 @@ class _WallPostState extends State<WallPost> {
                                     controller: commentTextController,
                                     hintText: "Post a comment...",
                                     obscureText: false,
+                                    maxLength: 0,
+                                    isText: true,
                                   ),
                                 ),
 

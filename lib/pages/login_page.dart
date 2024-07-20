@@ -101,6 +101,8 @@ class _LoginPageState extends State<LoginPage> {
                     controller: emailTextController,
                     hintText: 'Email',
                     obscureText: false,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 25),
 
@@ -109,6 +111,8 @@ class _LoginPageState extends State<LoginPage> {
                     controller: passwordTextController,
                     hintText: 'Password',
                     obscureText: true,
+                    maxLength: 0,
+                    isText: true,
                   ),
                   const SizedBox(height: 25),
 

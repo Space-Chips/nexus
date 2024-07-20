@@ -7,18 +7,24 @@ class MyTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final bool isText;
+  final int? maxLength;
 
   const MyTextField({
     super.key,
     required this.controller,
     required this.hintText,
+    required this.isText,
     required this.obscureText,
+    required this.maxLength,
   });
 
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     return TextField(
+      maxLength: maxLength != 0 ? maxLength : null,
+      keyboardType: isText ? TextInputType.text : TextInputType.number,
       controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(

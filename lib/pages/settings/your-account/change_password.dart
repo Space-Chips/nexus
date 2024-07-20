@@ -193,6 +193,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       controller: emailTextController,
                       hintText: 'Your email',
                       obscureText: true,
+                      maxLength: 0,
+                      isText: true,
                     ),
 
                     SizedBox(
