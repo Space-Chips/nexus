@@ -25,22 +25,47 @@ class _ChatHomePageState extends State<ChatHomePage> {
             const SizedBox(height: 15),
             _buildHeader(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    const TeamHomeTopItem(
-                      title: 'BAGUETTECHS',
-                      lastPost: "Oui oui baguette",
-                      lastPostAuthor: "Yursen le chef d'équipe",
-                      lastPostTime: '10/20/2028  20:30',
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        TeamHomeTopItem(
+                          title: 'BAGUETTECHS',
+                          lastPost: "Oui oui baguette",
+                          lastPostAuthor: "Yursen le chef d'équipe",
+                          lastPostTime: '10/20/2028  20:30',
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 20),
+                        _buildSmallTeamCards(),
+                        const SizedBox(height: 20),
+                        _buildSmallTeamCards(),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    _buildSmallTeamCards(),
-                    const SizedBox(height: 20),
-                    _buildSmallTeamCards(),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Container(
+                        height: 150, // control the aera covered
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.9),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
