@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexus/components/chat_components/team_home_page_components/top_item_list.dart';
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
@@ -28,7 +29,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    _buildTeamSection(),
+                    const TeamHomeTopItem(
+                      title: 'BAGUETTECHS',
+                      lastPost: "Oui oui baguette",
+                      lastPostAuthor: "Yursen le chef d'équipe",
+                      lastPostTime: '10/20/2028  20:30',
+                    ),
                     const SizedBox(height: 20),
                     _buildSmallTeamCards(),
                     const SizedBox(height: 20),

@@ -449,7 +449,6 @@ class _HomePageState extends State<HomePage> {
                           final post = filteredPosts[index - 1];
                           return WallPost(
                             message: post['Message'],
-                            user: post['User'],
                             userEmail: post['UserEmail'],
                             isAdminPost: post['isAdminPost'],
                             mediaDest: post['MediaDestination'],

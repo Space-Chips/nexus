@@ -583,7 +583,6 @@ class _PostReportState extends State<PostReport> {
                       if (postData != null) {
                         return WallPost(
                           message: postData['Message'],
-                          user: postData['User'],
                           userEmail: postData['UserEmail'],
                           isAdminPost: postData['isAdminPost'],
                           mediaDest: postData['MediaDestination'],

@@ -18,7 +18,6 @@ import 'like_button.dart';
 
 class WallPost extends StatefulWidget {
   final String message;
-  final String user;
   final String userEmail;
   final String time;
   final String postId;
@@ -31,7 +30,6 @@ class WallPost extends StatefulWidget {
   const WallPost({
     super.key,
     required this.message,
-    required this.user,
     required this.postId,
     required this.likes,
     required this.views,

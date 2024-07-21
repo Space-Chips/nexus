@@ -484,7 +484,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               final post = snapshot.data!.docs[index];
                               return WallPost(
                                 message: post['Message'],
-                                user: post['User'],
                                 userEmail: post['UserEmail'],
                                 isAdminPost: post['isAdminPost'],
                                 mediaDest: post['MediaDestination'],
