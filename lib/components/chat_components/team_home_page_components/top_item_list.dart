@@ -32,21 +32,20 @@ class _TeamHomeTopItemState extends State<TeamHomeTopItem> {
         children: [
           Text(
             widget.title,
-            style: TextStyle(color: Colors.white, fontSize: 30),
+            style: const TextStyle(color: Colors.white, fontSize: 30),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             widget.lastPost,
-            style: TextStyle(color: Colors.grey, fontSize: 12),
+            style: TextStyle(color: Colors.grey[300], fontSize: 12),
           ),
           Text(
             widget.lastPostAuthor,
-            style: TextStyle(color: Color(0xFF959595), fontSize: 10),
+            style: TextStyle(color: Colors.grey[500], fontSize: 10),
           ),
-          const SizedBox(height: 5),
           Text(
             widget.lastPostTime,
-            style: TextStyle(color: Color(0xFF959595), fontSize: 10),
+            style: TextStyle(color: Colors.grey[500], fontSize: 10),
           ),
         ],
       ),

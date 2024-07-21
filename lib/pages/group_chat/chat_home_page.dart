@@ -93,35 +93,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
     );
   }
 
-  Widget _buildTeamSection() {
-    return Container(
-      width: 354,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFF3A3A3A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'BAGUETTECHS',
-            style: TextStyle(color: Colors.white, fontSize: 30),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Oui oui baguette',
-            style: TextStyle(color: Color(0xFFCACACA), fontSize: 12),
-          ),
-          Text(
-            "Yursen le chef d'équipe\n01/07/2024 20:30",
-            style: TextStyle(color: Color(0xFF959595), fontSize: 10),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSmallTeamCards() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
