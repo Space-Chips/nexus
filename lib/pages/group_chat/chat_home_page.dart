@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:nexus/components/chat_components/team_home_page_components/top_item_list.dart';
 
@@ -8,7 +10,31 @@ class ChatHomePage extends StatefulWidget {
   State<ChatHomePage> createState() => _ChatHomePageState();
 }
 
-class _ChatHomePageState extends State<ChatHomePage> {
+class _ChatHomePageState extends State<ChatHomePage>
+    with SingleTickerProviderStateMixin {
+  bool isTeamsActive = true;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,6 +68,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                         _buildSmallTeamCards(),
                         const SizedBox(height: 20),
                         _buildSmallTeamCards(),
+                        const SizedBox(height: 70),
                       ],
                     ),
                   ),
@@ -80,40 +107,67 @@ class _ChatHomePageState extends State<ChatHomePage> {
   }
 
   Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 28),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
+    return SizedBox(
+      height: 130,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildColumn('YOUR', 'TEAMS', isTeamsActive, () {
+              if (!isTeamsActive) {
+                setState(() {
+                  isTeamsActive = true;
+                  _controller.forward(from: 0);
+                });
+              }
+            }),
+            _buildColumn('PRIVATE', 'CHAT', !isTeamsActive, () {
+              if (isTeamsActive) {
+                setState(() {
+                  isTeamsActive = false;
+                  _controller.forward(from: 0);
+                });
+              }
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColumn(
+      String topText, String bottomText, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          final double t = isActive ? _animation.value : 1 - _animation.value;
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'YOUR',
-                style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 40),
+                topText,
+                style: TextStyle(
+                  color: Color.lerp(const Color.fromARGB(150, 158, 158, 158),
+                      const Color(0xFF9E9E9E), t),
+                  fontSize: lerpDouble(28, 40, t),
+                  height: 1.1, // Add this line
+                ),
               ),
               Text(
-                'TEAMS',
-                style: TextStyle(color: Colors.white, fontSize: 48),
+                bottomText,
+                style: TextStyle(
+                  color: Color.lerp(const Color.fromARGB(150, 255, 255, 255),
+                      Colors.white, t),
+                  fontSize: lerpDouble(33.6, 48, t),
+                  height: 1.1, // Add this line
+                ),
               ),
             ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'PRIVATE',
-                style: TextStyle(
-                    color: Color.fromARGB(150, 158, 158, 158), fontSize: 28),
-              ),
-              Text(
-                'CHAT',
-                style: TextStyle(
-                    color: Color.fromARGB(150, 255, 255, 255), fontSize: 33.6),
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -171,6 +225,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(340, 41),
             backgroundColor: const Color(0xFF3A3A3A),
+            side: const BorderSide(color: Colors.white),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           child: const Text(
             'J O I N',
@@ -206,6 +264,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
         minimumSize: const Size(340, 58),
         backgroundColor: Colors.black,
         side: const BorderSide(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
       child: const Text(
         'C R E A T E     T E A M',
