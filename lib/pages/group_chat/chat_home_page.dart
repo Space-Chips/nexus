@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexus/components/chat_components/team_home_page_components/top_item_list.dart';
 
 class ChatHomePage extends StatefulWidget {
@@ -12,7 +14,8 @@ class ChatHomePage extends StatefulWidget {
 
 class _ChatHomePageState extends State<ChatHomePage>
     with SingleTickerProviderStateMixin {
-  bool isTeamsActive = true;
+  bool isTeamsActive = false;
+  final textController = TextEditingController();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -33,6 +36,46 @@ class _ChatHomePageState extends State<ChatHomePage>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void createTeam(String groupName, String groupId, String teamLeage) async {
+    if (textController.text.isNotEmpty && textController.text.length <= 200) {
+      FirebaseFirestore.instance.collection("TeamDetail").add({
+        'GroupName': groupName,
+        'Admin': [],
+        'Members': [],
+        'GroupId': groupId,
+        'TeamLeage': teamLeage,
+        'LastMessage': "No messages found.",
+        'LastMessageAuthor': "No messages found.",
+        'LastMessageTimeStamp': "",
+        'CreatedOn': Timestamp.now(),
+        'Description': "",
+        'Likes': [],
+        'Views': [],
+      });
+    } else {
+      if (textController.text.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "Post can't be blank.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return;
+      }
+      if (textController.text.length >= 200) {
+        Fluttertoast.showToast(
+          msg: "Post limited to 200 characters.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return;
+      }
+    }
   }
 
   @override

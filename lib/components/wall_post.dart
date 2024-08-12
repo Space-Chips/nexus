@@ -97,12 +97,11 @@ class _WallPostState extends State<WallPost> {
   }
 
   Future<void> getMediaUrl() async {
-    final ref = storage.ref().child("files/${widget.mediaDest}");
+    final ref =
+        FirebaseStorage.instance.ref().child("files/${widget.mediaDest}");
 
     try {
       final url = await ref.getDownloadURL();
-
-      // Check if the widget is still active before calling setState
       if (!_isDisposed) {
         setState(() {
           mediaUrl = url;
@@ -110,6 +109,11 @@ class _WallPostState extends State<WallPost> {
       }
     } catch (e) {
       // Handle error
+      if (!_isDisposed) {
+        setState(() {
+          mediaUrl = ""; // Or a default/error image URL
+        });
+      }
     }
   }
 
