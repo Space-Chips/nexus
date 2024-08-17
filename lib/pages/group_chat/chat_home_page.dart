@@ -40,20 +40,25 @@ class _ChatHomePageState extends State<ChatHomePage>
 
   void createTeam(String groupName, String groupId, String teamLeage) async {
     if (textController.text.isNotEmpty && textController.text.length <= 200) {
-      FirebaseFirestore.instance.collection("TeamDetail").add({
-        'GroupName': groupName,
-        'Admin': [],
-        'Members': [],
-        'GroupId': groupId,
-        'TeamLeage': teamLeage,
-        'LastMessage': "No messages found.",
-        'LastMessageAuthor': "No messages found.",
-        'LastMessageTimeStamp': "",
-        'CreatedOn': Timestamp.now(),
-        'Description': "",
-        'Likes': [],
-        'Views': [],
-      });
+      String groupID =
+          FirebaseFirestore.instance.collection("TeamDetial").doc().id;
+
+      FirebaseFirestore.instance.collection("TeamDetail").doc(groupID).set(
+        {
+          'GroupName': groupName,
+          'Admin': [],
+          'Members': [],
+          'GroupId': groupID,
+          'TeamLeage': teamLeage,
+          'LastMessage': "",
+          'LastMessageAuthor': "",
+          'LastMessageTimeStamp': "",
+          'CreatedOn': Timestamp.now(),
+          'Description': "",
+          'Likes': [],
+          'Views': [],
+        },
+      );
     } else {
       if (textController.text.isEmpty) {
         Fluttertoast.showToast(
@@ -99,7 +104,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                   SingleChildScrollView(
                     child: Column(
                       children: [
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 5),
                         TeamHomeTopItem(
                           title: 'BAGUETTECHS',
                           lastPost: "Oui oui baguette",
@@ -268,7 +273,7 @@ class _ChatHomePageState extends State<ChatHomePage>
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(340, 41),
             backgroundColor: const Color(0xFF3A3A3A),
-            side: const BorderSide(color: Colors.white),
+            //side: const BorderSide(color: Colors.white),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),

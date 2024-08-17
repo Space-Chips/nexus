@@ -416,6 +416,8 @@ class _HomePageState extends State<HomePage> {
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
+                      imageCache.clear();
+                      imageCache.clearLiveImages();
                       final allPosts = snapshot.data!.docs;
 
                       // Continue with your logic to filter posts based on blocked users (blockedUsersEmails)
@@ -448,6 +450,7 @@ class _HomePageState extends State<HomePage> {
 
                           final post = filteredPosts[index - 1];
                           return WallPost(
+                            key: ValueKey(post.id),
                             message: post['Message'],
                             userEmail: post['UserEmail'],
                             isAdminPost: post['isAdminPost'],
