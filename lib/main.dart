@@ -9,6 +9,7 @@ import 'package:nexus/auth/auth.dart';
 import 'package:nexus/auth/login_or_register.dart';
 import 'package:nexus/pages/ad_page.dart';
 import 'package:nexus/pages/personal_page.dart';
+import 'package:nexus/services/ad_service.dart';
 import 'package:nexus/theme/dark_theme.dart';
 import 'package:nexus/theme/light_theme.dart';
 import 'pages/login_page.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
               color: Colors.grey[900],
             ),
           ),
-          nextScreen: const AdPage(),
+          nextScreen: const AdPlatformSelection(),
         ),
         debugShowCheckedModeBanner: false,
         theme: theme,

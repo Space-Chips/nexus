@@ -96,7 +96,7 @@ class _ChatHomePageState extends State<ChatHomePage>
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 15),
+            const SizedBox(height: 30),
             _buildHeader(),
             Expanded(
               child: Stack(

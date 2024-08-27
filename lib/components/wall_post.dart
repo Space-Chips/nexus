@@ -690,18 +690,22 @@ class _WallPostState extends State<WallPost> {
                       child: CachedNetworkImage(
                         key: ValueKey(widget.postId),
                         imageUrl: mediaUrl,
-                        memCacheWidth: 300, // Adjust based on your needs
-                        memCacheHeight: 300, // Adjust based on your needs
                         placeholder: (context, url) => SizedBox(
-                          width: 100, // Adjust as needed
-                          height: 100, // Adjust as needed
+                          width: 300, // Adjust as needed
+                          height: 200, // Adjust as needed
                           child: Center(child: CircularProgressIndicator()),
                         ),
                         fadeInDuration: Duration(milliseconds: 300),
                         errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[300],
+                          width: 300, // Adjust as needed
+                          height: 200, // Adjust as needed
+                          color: Theme.of(context).colorScheme.secondary,
                           child: Center(
-                            child: Icon(Icons.error, color: Colors.red),
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.grey,
+                              size: 35,
+                            ),
                           ),
                         ),
                       )),

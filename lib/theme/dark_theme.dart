@@ -21,6 +21,9 @@ ThemeData darkTheme = ThemeData(
         Colors.blue.withOpacity(0.2), // Set the text selection color
     selectionHandleColor: Colors.blue, // Set the selection handle color
   ),
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    color: Colors.grey[300], // Set the color of the progress indicator
+  ),
 );
 
 SettingsThemeData darkSettingsTheme = const SettingsThemeData(
