@@ -73,8 +73,6 @@ dependencies:
   animated_background: ^2.0.0
 
 dev_dependencies:
-  flutter_test:
-
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.0
 
