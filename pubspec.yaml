@@ -18,7 +18,7 @@ description: Gen Z social network
 version: 1.0.0+16
 
 environment:
-  sdk: '>=1.0.0 <4.0.0'
+  sdk: '>=3.0.6 <4.0.0'
 
 
 
@@ -73,6 +73,8 @@ dependencies:
   animated_background: ^2.0.0
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.0
 
