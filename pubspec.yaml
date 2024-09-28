@@ -18,7 +18,7 @@ description: Gen Z social network
 version: 1.0.0+16
 
 environment:
-  sdk: '>=3.0.6 <4.0.0'
+  sdk: '>=2.19.2 <4.0.0'
 
 
 
