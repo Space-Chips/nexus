@@ -29,7 +29,7 @@ class _TeamHomeTopItemState extends State<TeamHomeTopItem> {
         width: 354,
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: const Color(0xFF3A3A3A),
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -37,7 +37,7 @@ class _TeamHomeTopItemState extends State<TeamHomeTopItem> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(color: Colors.white, fontSize: 30),
+              style: TextStyle(color: Colors.grey[600], fontSize: 30),
             ),
             const SizedBox(height: 20),
             Text(

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,8 @@ import 'package:nexus/helper/helper_methods.dart';
 import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
+import 'package:redacted/redacted.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -173,16 +176,11 @@ class _HomePageState extends State<HomePage> {
         var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
         var blockedUsers = userData['blockedUsersEmails'] ??
             <String>[]; // Initialize with an empty list if null
+        // ignore: non_constant_identifier_names
+        var drawer_item_order = userData['drawerItemOrder'];
         var username = userData['username'];
         var isAdmin = userData['admin'];
         var email = userData['email'];
-
-        setState(() {
-          blockedUsersEmails = blockedUsers;
-          usernameState = username;
-          isAdminState = isAdmin;
-          emailState = email;
-        });
       }
     } catch (e) {
       //
@@ -365,6 +363,7 @@ class _HomePageState extends State<HomePage> {
             child: AppBar(
               title: Text(
                 "N E X U S",
+                style: TextStyle(),
                 selectionColor: Theme.of(context).colorScheme.primary,
               ),
               centerTitle: true,
@@ -460,6 +459,9 @@ class _HomePageState extends State<HomePage> {
                             likes: List<String>.from(post['Likes'] ?? []),
                             views: List<String>.from(post['Views'] ?? []),
                             time: formatDate(post['TimeStamp']),
+                          ).redacted(
+                            context: context,
+                            redact: true,
                           );
                         },
                       );

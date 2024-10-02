@@ -16,9 +16,19 @@ class _AdPageState extends State<AdPage> {
   late BannerAd _bannerAd2;
   late BannerAd _bannerAd3;
   late BannerAd _bannerAd4;
+  late BannerAd _bannerAd5;
+  late BannerAd _bannerAd6;
+  late BannerAd _bannerAd7;
+  late BannerAd _bannerAd8;
+
   bool _isAdLoaded = false;
   bool _isAd2Loaded = false;
   bool _isAd3Loaded = false;
+  bool _isAd4Loaded = false;
+  bool _isAd5Loaded = false;
+  bool _isAd6Loaded = false;
+  bool _isAd7Loaded = false;
+  bool _isAd8Loaded = false;
 
   @override
   void initState() {
@@ -27,8 +37,12 @@ class _AdPageState extends State<AdPage> {
     _initBannerAd2();
     _initBannerAd3();
     _initBannerAd4();
+    _initBannerAd5();
+    _initBannerAd6();
+    _initBannerAd7();
+    _initBannerAd8();
     // Start a timer to navigate to AuthPage after 3 seconds
-    Timer(const Duration(seconds: 6), () {
+    Timer(const Duration(seconds: 10), () {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const AuthPage()));
     });
@@ -40,6 +54,10 @@ class _AdPageState extends State<AdPage> {
     _initBannerAd2();
     _initBannerAd3();
     _initBannerAd4();
+    _initBannerAd5();
+    _initBannerAd6();
+    _initBannerAd7();
+    _initBannerAd8();
     super.dispose();
   }
 
@@ -98,6 +116,72 @@ class _AdPageState extends State<AdPage> {
     _bannerAd4 = BannerAd(
       size: AdSize.banner,
       adUnitId: AdHelper.bannerAdUnitId4,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {});
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd4.load();
+  }
+
+  _initBannerAd5() {
+    _bannerAd = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId5,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd.load();
+  }
+
+  _initBannerAd6() {
+    _bannerAd2 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId6,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAd2Loaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd2.load();
+  }
+
+  _initBannerAd7() {
+    _bannerAd3 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId7,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAd3Loaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {},
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd3.load();
+  }
+
+  _initBannerAd8() {
+    _bannerAd4 = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId8,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           setState(() {});
@@ -200,7 +284,31 @@ class _AdPageState extends State<AdPage> {
                                       ),
                                     )
                                   : const SizedBox(),
-                              if (!_isAdLoaded && !_isAd2Loaded)
+                              _isAd4Loaded
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 5.0, bottom: 5.0),
+                                      child: SizedBox(
+                                        height:
+                                            _bannerAd4.size.height.toDouble(),
+                                        width: _bannerAd4.size.width.toDouble(),
+                                        child: ClipRRect(
+                                          // Round corners of the ad widget
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Adjust the radius as needed
+                                          child: AdWidget(ad: _bannerAd4),
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                              if (!_isAdLoaded &&
+                                  !_isAd2Loaded &&
+                                  !_isAd3Loaded &&
+                                  !_isAd4Loaded &&
+                                  !_isAd5Loaded &&
+                                  !_isAd6Loaded &&
+                                  !_isAd7Loaded &&
+                                  !_isAd8Loaded)
                                 const Center(
                                   child: CircularProgressIndicator(),
                                 ),

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexus/components/chat_components/team_home_page_components/top_item_list.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
@@ -16,6 +17,8 @@ class _ChatHomePageState extends State<ChatHomePage>
     with SingleTickerProviderStateMixin {
   bool isTeamsActive = false;
   final textController = TextEditingController();
+  final TextEditingController groupNameController = TextEditingController();
+  final TextEditingController teamLeagueController = TextEditingController();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -83,6 +86,47 @@ class _ChatHomePageState extends State<ChatHomePage>
     }
   }
 
+  void _showCreateTeamModal(BuildContext context) {
+    WoltModalSheet.show<void>(
+      context: context,
+      pageListBuilder: (BuildContext _) {
+        return [
+          WoltModalSheetPage(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: groupNameController,
+                    decoration: const InputDecoration(labelText: 'Group Name'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: teamLeagueController,
+                    decoration: const InputDecoration(labelText: 'Team League'),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      createTeam(
+                        groupNameController.text,
+                        '', // GroupId will be generated in the function
+                        teamLeagueController.text,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Create Team'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ];
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,8 +176,14 @@ class _ChatHomePageState extends State<ChatHomePage>
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withOpacity(0.9),
-                              Colors.transparent,
+                              Theme.of(context)
+                                  .colorScheme
+                                  .surface
+                                  .withOpacity(0.9),
+                              Theme.of(context)
+                                  .colorScheme
+                                  .surface
+                                  .withOpacity(0.1)
                             ],
                           ),
                         ),
@@ -198,8 +248,7 @@ class _ChatHomePageState extends State<ChatHomePage>
               Text(
                 topText,
                 style: TextStyle(
-                  color: Color.lerp(const Color.fromARGB(150, 158, 158, 158),
-                      const Color(0xFF9E9E9E), t),
+                  color: Theme.of(context).colorScheme.tertiary,
                   fontSize: lerpDouble(28, 40, t),
                   height: 1.1, // Add this line
                 ),
@@ -207,8 +256,7 @@ class _ChatHomePageState extends State<ChatHomePage>
               Text(
                 bottomText,
                 style: TextStyle(
-                  color: Color.lerp(const Color.fromARGB(150, 255, 255, 255),
-                      Colors.white, t),
+                  color: Colors.grey,
                   fontSize: lerpDouble(33.6, 48, t),
                   height: 1.1, // Add this line
                 ),
@@ -236,7 +284,7 @@ class _ChatHomePageState extends State<ChatHomePage>
       height: 175,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: const Color(0xFF3A3A3A),
+        color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -244,7 +292,7 @@ class _ChatHomePageState extends State<ChatHomePage>
         children: [
           Text(
             title,
-            style: const TextStyle(color: Colors.white, fontSize: 25),
+            style: TextStyle(color: Colors.grey[600], fontSize: 25),
           ),
           const Spacer(),
           const Text(
@@ -260,66 +308,69 @@ class _ChatHomePageState extends State<ChatHomePage>
     );
   }
 
-  Widget _buildJoinSection() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(6, (index) => _buildNumberBox(index + 1)),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(340, 41),
-            backgroundColor: const Color(0xFF3A3A3A),
-            //side: const BorderSide(color: Colors.white),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Text(
-            'J O I N',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNumberBox(int number) {
-    return Container(
-      width: 31,
-      height: 41,
-      decoration: BoxDecoration(
-        color: const Color(0xFF3A3A3A),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(width: 1),
-      ),
-      child: Center(
-        child: Text(
-          '$number',
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCreateTeamButton() {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        _showCreateTeamModal(context);
+      },
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(340, 58),
-        backgroundColor: Colors.black,
-        side: const BorderSide(color: Colors.white),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        side: const BorderSide(color: Colors.black),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      child: const Text(
+      child: Text(
         'C R E A T E     T E A M',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
       ),
     );
   }
+}
+
+Widget _buildJoinSection() {
+  return Column(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(6, (index) => _buildNumberBox(index + 1)),
+      ),
+      const SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(340, 41),
+          backgroundColor: Colors.grey,
+          //side: const BorderSide(color: Colors.white),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: const Text(
+          'J O I N',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildNumberBox(int number) {
+  return Container(
+    width: 31,
+    height: 41,
+    decoration: BoxDecoration(
+      color: Colors.grey[700],
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Center(
+      child: Text(
+        '$number',
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+      ),
+    ),
+  );
 }

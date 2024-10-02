@@ -716,7 +716,7 @@ class _WallPostState extends State<WallPost> {
           if (widget.mediaDest != "") const SizedBox(height: 20),
           if (widget.mediaDest == "") const SizedBox(height: 5),
 
-          Text(widget.message),
+          SelectableText(widget.message),
 
           // Wall post
           Row(

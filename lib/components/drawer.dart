@@ -1,11 +1,8 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nexus/components/my_list_tile.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MyDrawer extends StatefulWidget {
   final void Function()? onSearchTap;
@@ -15,7 +12,9 @@ class MyDrawer extends StatefulWidget {
   final void Function()? onGroupChatTap;
   final void Function()? onSignOut;
   final void Function()? onThemeTap;
+
   final bool isAdmin;
+
   const MyDrawer({
     super.key,
     required this.onSearchTap,
@@ -29,12 +28,20 @@ class MyDrawer extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _MyDrawerState createState() => _MyDrawerState();
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  late List<String> _drawerItemOrder;
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  List<String> drawerItemOrder = [
+    'HOME',
+    'TEAMS',
+    'SEARCH',
+    'PROFILE',
+    'THEME',
+    'LIVE CHAT',
+    'ADMIN CHAT',
+  ];
 
   @override
   void initState() {
@@ -42,25 +49,62 @@ class _MyDrawerState extends State<MyDrawer> {
     _loadDrawerItemOrder();
   }
 
-  void _loadDrawerItemOrder() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _drawerItemOrder = prefs.getStringList('drawerItemOrder') ??
-          [
-            'HOME',
-            'SEARCH',
-            'PROFILE',
-            'THEME',
-            'LIVE CHAT',
-            'ADMIN CHAT',
-            'TEAMS'
-          ];
-    });
+  Future<void> _loadDrawerItemOrder() async {
+    if (currentUser == null) {
+      print("Skipping drawer item load because currentUser is null.");
+      return;
+    }
+
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where('email', isEqualTo: currentUser.email)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        var userDocument = snapshot.docs[0];
+        var firestoreOrder = userDocument['drawerItemOrder'];
+
+        // Check if the Firestore order is a valid list
+        if (firestoreOrder is List && firestoreOrder.isNotEmpty) {
+          setState(() {
+            drawerItemOrder = List<String>.from(firestoreOrder);
+            print("Loaded drawer order from Firestore: $drawerItemOrder");
+          });
+        } else {
+          print(
+              "Firestore drawerItemOrder is empty or invalid, using default.");
+          _saveDrawerItemOrder(); // Save default order if empty
+        }
+      } else {
+        print("No document found for this user in Firestore.");
+      }
+    } catch (error) {
+      print("Error loading drawer item order: $error");
+    }
   }
 
-  void _saveDrawerItemOrder() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('drawerItemOrder', _drawerItemOrder);
+  Future<void> _saveDrawerItemOrder() async {
+    try {
+      if (currentUser == null) {
+        print("Can't save drawer item order because currentUser is null.");
+        return;
+      }
+
+      var userCollection = FirebaseFirestore.instance.collection('users');
+      var querySnapshot = await userCollection
+          .where('email', isEqualTo: currentUser.email)
+          .get();
+
+      if (querySnapshot.size > 0) {
+        var userDocument = querySnapshot.docs[0];
+        await userDocument.reference
+            .update({'drawerItemOrder': drawerItemOrder});
+        print("Drawer order saved to Firestore for ${currentUser.email}");
+      }
+    } catch (error) {
+      print("Error saving drawer item order: $error");
+    }
   }
 
   List<Widget> _buildDrawerItems() {
@@ -78,54 +122,52 @@ class _MyDrawerState extends State<MyDrawer> {
         onTap: widget.onSearchTap,
       ),
       'PROFILE': MyListTile(
-        key: UniqueKey(),
+        key: ValueKey('PROFILE'),
         icon: Icons.person_rounded,
         text: 'P R O F I L E',
         onTap: widget.onProfileTap,
       ),
       'THEME': MyListTile(
-        key: UniqueKey(),
+        key: ValueKey('THEME'),
         icon: Icons.bedtime_rounded,
         text: 'T H E M E',
         onTap: widget.onThemeTap,
       ),
       'LIVE CHAT': MyListTile(
-        key: UniqueKey(),
+        key: ValueKey('LIVE CHAT'),
         icon: Icons.chat,
         text: 'L I V E  C H A T',
         onTap: widget.onLiveChatTap,
       ),
       if (widget.isAdmin)
         'ADMIN CHAT': MyListTile(
-          key: UniqueKey(),
+          key: ValueKey('ADMIN CHAT'),
           icon: Icons.shield_rounded,
           text: 'A D M I N  C H A T',
           onTap: widget.onAdminChatTap,
         ),
       'TEAMS': Padding(
-        key: UniqueKey(),
+        key: ValueKey('TEAMS'),
         padding: const EdgeInsets.only(left: 10.0),
         child: ExpansionTile(
-          leading: Icon(
+          key: ValueKey('TEAMS_TILE'),
+          iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          leading: const Icon(
             Icons.group,
             color: Colors.white,
           ),
-          title: Text(
+          title: const Text(
             'T E A M S',
-            style: TextStyle(
-              color: Colors.white,
-            ),
+            style: TextStyle(color: Colors.white),
           ),
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   'MY TEAMS',
-                  style: TextStyle(
-                    // fontFamily: 'Times New Roman',
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(color: Colors.white),
                 ),
                 onTap: widget.onGroupChatTap,
               ),
@@ -133,12 +175,9 @@ class _MyDrawerState extends State<MyDrawer> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   'EXPLORE TEAMS',
-                  style: TextStyle(
-                    //fontFamily: 'Times New Roman',
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
                   // Handle tap
@@ -150,11 +189,22 @@ class _MyDrawerState extends State<MyDrawer> {
       ),
     };
 
-    return _drawerItemOrder.map((itemKey) => itemMap[itemKey]!).toList();
+    return drawerItemOrder.map((itemKey) {
+      if (itemMap.containsKey(itemKey)) {
+        return itemMap[itemKey]!;
+      } else {
+        print("Invalid itemKey in drawer order: $itemKey");
+        return Container();
+      }
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (currentUser == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
@@ -162,37 +212,22 @@ class _MyDrawerState extends State<MyDrawer> {
           backgroundColor: Colors.grey[900]?.withOpacity(0.1),
           child: Column(
             children: [
-              DrawerHeader(
+              const DrawerHeader(
                 child: Icon(Icons.person, color: Colors.white, size: 64),
               ),
               Expanded(
                 child: ReorderableListView(
                   children: _buildDrawerItems(),
                   onReorder: (oldIndex, newIndex) {
-                    HapticFeedback.selectionClick();
-
                     setState(() {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
                       }
-                      final String item = _drawerItemOrder.removeAt(oldIndex);
-                      _drawerItemOrder.insert(newIndex, item);
+                      final String item = drawerItemOrder.removeAt(oldIndex);
+                      drawerItemOrder.insert(newIndex, item);
                       _saveDrawerItemOrder();
                     });
-                  },
-                  proxyDecorator:
-                      (Widget child, int index, Animation<double> animation) {
-                    return AnimatedBuilder(
-                      animation: animation,
-                      builder: (BuildContext context, Widget? child) {
-                        return Material(
-                          color: Colors.transparent,
-                          elevation: 0,
-                          child: child,
-                        );
-                      },
-                      child: child,
-                    );
+                    HapticFeedback.selectionClick();
                   },
                 ),
               ),
@@ -206,6 +241,37 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class MyListTile extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final void Function()? onTap;
+
+  const MyListTile({
+    Key? key,
+    required this.icon,
+    required this.text,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10.0),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: Colors.white,
+        ),
+        onTap: onTap,
+        title: Text(
+          text,
+          style: const TextStyle(color: Colors.white),
         ),
       ),
     );
