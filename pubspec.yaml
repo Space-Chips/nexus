@@ -80,6 +80,14 @@ dev_dependencies:
 
 flutter_launcher_icons:
   ios: true
+  macos:
+    generate: true
+    image_path: "assets/images/1024.jpeg"
+  windows:
+    generate: true
+    image_path: "assets/images/1024.jpeg"
+    icon_size: 48 # min:48, max:256, default: 48
+
   image_path: "assets/images/1024.jpeg"
   remove_alpha_ios: true
 

@@ -29,7 +29,7 @@ class _TeamHomeTopItemState extends State<TeamHomeTopItem> {
         width: 354,
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.secondary,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(

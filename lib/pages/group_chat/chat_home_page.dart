@@ -92,19 +92,76 @@ class _ChatHomePageState extends State<ChatHomePage>
       pageListBuilder: (BuildContext _) {
         return [
           WoltModalSheetPage(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Text(
+                    'Create New Team',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.tertiary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
                   TextField(
                     controller: groupNameController,
-                    decoration: const InputDecoration(labelText: 'Group Name'),
+                    decoration: InputDecoration(
+                      labelText: 'Group Name',
+                      labelStyle: TextStyle(color: Colors.grey[300]),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondary
+                                .withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .onSecondary
+                          .withOpacity(0.1),
+                    ),
+                    style: TextStyle(color: Colors.grey[300]),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: teamLeagueController,
-                    decoration: const InputDecoration(labelText: 'Team League'),
+                    decoration: InputDecoration(
+                      labelText: 'Team League',
+                      labelStyle: TextStyle(color: Colors.grey[300]),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondary
+                                .withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .onSecondary
+                          .withOpacity(0.1),
+                    ),
+                    style: TextStyle(color: Colors.grey[300]),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
@@ -116,12 +173,27 @@ class _ChatHomePageState extends State<ChatHomePage>
                       );
                       Navigator.of(context).pop();
                     },
-                    child: const Text('Create Team'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Create Team',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.tertiary),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
+          )
         ];
       },
     );
@@ -170,7 +242,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                     bottom: 0,
                     child: IgnorePointer(
                       child: Container(
-                        height: 150, // control the aera covered
+                        height: 50, // control the aera covered
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.bottomCenter,
@@ -183,7 +255,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                               Theme.of(context)
                                   .colorScheme
                                   .surface
-                                  .withOpacity(0.1)
+                                  .withOpacity(0.0)
                             ],
                           ),
                         ),

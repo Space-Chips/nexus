@@ -166,24 +166,26 @@ class _HomePageState extends State<HomePage> {
 
   // Get the user data
   void fetchUserData() async {
-    try {
-      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection("users")
-          .where("email", isEqualTo: currentUser.email)
-          .get();
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("email", isEqualTo: currentUser.email)
+        .get();
 
-      if (userSnapshot.docs.isNotEmpty) {
-        var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
-        var blockedUsers = userData['blockedUsersEmails'] ??
-            <String>[]; // Initialize with an empty list if null
-        // ignore: non_constant_identifier_names
-        var drawer_item_order = userData['drawerItemOrder'];
-        var username = userData['username'];
-        var isAdmin = userData['admin'];
-        var email = userData['email'];
-      }
-    } catch (e) {
-      //
+    if (userSnapshot.docs.isNotEmpty) {
+      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+      var blockedUsers = userData['blockedUsersEmails'] ??
+          <String>[]; // Initialize with an empty list if null
+      // ignore: non_constant_identifier_names
+      var username = userData['username'];
+      var isAdmin = userData['admin'];
+      var email = userData['email'];
+
+      setState(() {
+        blockedUsersEmails = blockedUsers;
+        usernameState = username;
+        isAdminState = isAdmin;
+        emailState = email;
+      });
     }
   }
 
