@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nexus/components/challenge_components/challenge_widget.dart';
 import 'package:nexus/pages/group_chat/chat_home_page.dart';
 import 'package:nexus/pages/settings/your-account/your_account.dart';
+import 'package:nexus/services/user_profile.dart';
 import 'package:path/path.dart' as Path;
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:nexus/components/drawer.dart';
@@ -23,7 +24,6 @@ import 'package:nexus/pages/tools/admin_chat.dart';
 import 'package:nexus/pages/livechat_page.dart';
 import 'package:nexus/pages/user_search_page.dart';
 import 'package:redacted/redacted.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -66,6 +66,10 @@ class _HomePageState extends State<HomePage> {
     fetchUserData();
     fetchChallengeData();
     checkAccountAndSignOut();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      BlocProvider.of<UserBloc>(context)
+          .add(FetchUserData(currentUser.email.toString()));
+    });
   }
 
   @override
@@ -179,12 +183,14 @@ class _HomePageState extends State<HomePage> {
       var username = userData['username'];
       var isAdmin = userData['admin'];
       var email = userData['email'];
+      var userId = userData['UserId'];
 
       setState(() {
         blockedUsersEmails = blockedUsers;
         usernameState = username;
         isAdminState = isAdmin;
         emailState = email;
+        userId = userId;
       });
     }
   }
@@ -259,7 +265,6 @@ class _HomePageState extends State<HomePage> {
 
       FirebaseFirestore.instance.collection("Posts").add({
         'UserEmail': emailState,
-        'User': usernameState,
         'UserId': userId,
         'Message': textController.text,
         'isAdminPost': isAdminState,
@@ -342,11 +347,12 @@ class _HomePageState extends State<HomePage> {
   void goToGroupChatPage() {
     Navigator.pop(context);
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ChatHomePage(),
-      ),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatHomePage(
+                  username: usernameState,
+                  userId: userId,
+                )));
   }
 
   @override
@@ -366,12 +372,10 @@ class _HomePageState extends State<HomePage> {
               title: Text(
                 "N E X U S",
                 style: TextStyle(),
-                selectionColor: Theme.of(context).colorScheme.primary,
+                selectionColor:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
               ),
               centerTitle: true,
-              elevation: 0.0,
-              backgroundColor:
-                  Theme.of(context).colorScheme.surface.withOpacity(0.2),
               actions: [
                 IconButton(
                   onPressed: signOut,

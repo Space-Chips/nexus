@@ -1,13 +1,24 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nexus/components/chat_components/team_home_page_components/top_item_list.dart';
+import 'package:nexus/helper/helper_methods.dart';
+import 'package:nexus/pages/group_chat/chat_page.dart';
+import 'package:nexus/services/user_profile.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class ChatHomePage extends StatefulWidget {
-  const ChatHomePage({super.key});
+  final String username;
+  final String userId;
+  const ChatHomePage({
+    required this.username,
+    required this.userId,
+    super.key,
+  });
 
   @override
   State<ChatHomePage> createState() => _ChatHomePageState();
@@ -16,11 +27,13 @@ class ChatHomePage extends StatefulWidget {
 class _ChatHomePageState extends State<ChatHomePage>
     with SingleTickerProviderStateMixin {
   bool isTeamsActive = false;
+  final currentUser = FirebaseAuth.instance.currentUser;
   final textController = TextEditingController();
   final TextEditingController groupNameController = TextEditingController();
   final TextEditingController teamLeagueController = TextEditingController();
   late AnimationController _controller;
   late Animation<double> _animation;
+  String selectedLeague = "FTC";
 
   @override
   void initState() {
@@ -41,49 +54,46 @@ class _ChatHomePageState extends State<ChatHomePage>
     super.dispose();
   }
 
-  void createTeam(String groupName, String groupId, String teamLeage) async {
-    if (textController.text.isNotEmpty && textController.text.length <= 200) {
-      String groupID =
-          FirebaseFirestore.instance.collection("TeamDetial").doc().id;
+  void createTeam(String groupName, String teamLeage) async {
+    String groupID =
+        FirebaseFirestore.instance.collection("TeamDetial").doc().id;
 
-      FirebaseFirestore.instance.collection("TeamDetail").doc(groupID).set(
-        {
-          'GroupName': groupName,
-          'Admin': [],
-          'Members': [],
-          'GroupId': groupID,
-          'TeamLeage': teamLeage,
-          'LastMessage': "",
-          'LastMessageAuthor': "",
-          'LastMessageTimeStamp': "",
-          'CreatedOn': Timestamp.now(),
-          'Description': "",
-          'Likes': [],
-          'Views': [],
-        },
-      );
-    } else {
-      if (textController.text.isEmpty) {
-        Fluttertoast.showToast(
-          msg: "Post can't be blank.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-        );
-        return;
-      }
-      if (textController.text.length >= 200) {
-        Fluttertoast.showToast(
-          msg: "Post limited to 200 characters.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-        );
-        return;
-      }
-    }
+    FirebaseFirestore.instance.collection("TeamDetail").doc(groupID).set(
+      {
+        'GroupName': groupName,
+        'Admin': [currentUser?.email],
+        'Members': [currentUser?.email],
+        'GroupId': groupID,
+        'TeamLeage': teamLeage,
+        'LastMessage': "This group was  created by ${widget.username}",
+        'LastMessageAuthor': widget.username,
+        'LastMessageTimeStamp': Timestamp.now(),
+        'CreatedOn': Timestamp.now(),
+        'Description': "",
+        'Likes': [currentUser?.email],
+      },
+    );
+    FirebaseFirestore.instance
+        .collection("TeamChat")
+        .doc(groupID)
+        .collection("Posts")
+        .add(
+      {
+        'UserEmail': currentUser?.email,
+        'UserId': currentUser?.getIdToken(),
+        'Message': "This group was created by ${widget.username}",
+        'isSystemPost': true,
+        'TimeStamp': Timestamp.now(),
+      },
+    );
+
+    Fluttertoast.showToast(
+      msg: "${groupName.toLowerCase()} was created.",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.green,
+      textColor: Colors.white,
+    );
   }
 
   void _showCreateTeamModal(BuildContext context) {
@@ -108,22 +118,30 @@ class _ChatHomePageState extends State<ChatHomePage>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
+                  // Group Name text field
                   TextField(
                     controller: groupNameController,
                     decoration: InputDecoration(
                       labelText: 'Group Name',
-                      labelStyle: TextStyle(color: Colors.grey[300]),
+                      labelStyle: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .tertiary
+                              .withOpacity(0.6)),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSecondary
-                                .withOpacity(0.3)),
+                                .withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .tertiary
+                                .withOpacity(0.2),
                             width: 2),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -134,24 +152,33 @@ class _ChatHomePageState extends State<ChatHomePage>
                           .withOpacity(0.1),
                     ),
                     style: TextStyle(color: Colors.grey[300]),
-                  ),
+                  ), // Group name text field
+                  // Team League selector
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: teamLeagueController,
+                  DropdownButtonFormField<String>(
+                    value: selectedLeague,
                     decoration: InputDecoration(
                       labelText: 'Team League',
-                      labelStyle: TextStyle(color: Colors.grey[300]),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .tertiary
+                            .withOpacity(0.6),
+                      ),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSecondary
-                                .withOpacity(0.3)),
+                                .withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .tertiary
+                                .withOpacity(0.2),
                             width: 2),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -161,15 +188,27 @@ class _ChatHomePageState extends State<ChatHomePage>
                           .onSecondary
                           .withOpacity(0.1),
                     ),
+                    dropdownColor: Theme.of(context).colorScheme.secondary,
                     style: TextStyle(color: Colors.grey[300]),
+                    items: <String>['FTC', 'FRC', 'FLL', 'Other']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        selectedLeague = newValue; // Update selected value
+                      }
+                    },
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
                       createTeam(
                         groupNameController.text,
-                        '', // GroupId will be generated in the function
-                        teamLeagueController.text,
+                        selectedLeague,
                       );
                       Navigator.of(context).pop();
                     },
@@ -199,6 +238,32 @@ class _ChatHomePageState extends State<ChatHomePage>
     );
   }
 
+  void goToChatPage(
+    String groupName,
+    String lastMessage,
+    String lastMessageAuthor,
+    Timestamp lastMessageTimeStamp,
+    String teamLeage,
+    String groupId,
+    String userId,
+  ) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TeamChatPage(
+          groupName: groupName,
+          lastMessage: lastMessage,
+          lastMessageAuthor: lastMessageAuthor,
+          lastMessageTimeStamp: lastMessageTimeStamp,
+          teamLeage: teamLeage,
+          groupId: groupId,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,69 +275,138 @@ class _ChatHomePageState extends State<ChatHomePage>
         elevation: 0,
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            _buildHeader(),
-            Expanded(
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 5),
-                        TeamHomeTopItem(
-                          title: 'BAGUETTECHS',
-                          lastPost: "Oui oui baguette",
-                          lastPostAuthor: "Yursen le chef d'équipe",
-                          lastPostTime: '10/20/2028  20:30',
-                          onTap: () {},
-                        ),
-                        const SizedBox(height: 20),
-                        _buildSmallTeamCards(),
-                        const SizedBox(height: 20),
-                        _buildSmallTeamCards(),
-                        const SizedBox(height: 70),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: IgnorePointer(
+          child: Column(
+        children: [
+          const SizedBox(height: 30),
+          _buildHeader(),
+          Expanded(
+            child: Stack(
+              children: [
+                // ListView with StreamBuilder
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('TeamDetail')
+                      .where('Members', arrayContains: currentUser?.email)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final allPosts = snapshot.data!.docs;
+
+                      // Check if there are any documents
+                      if (allPosts.isNotEmpty) {
+                        final firstGroup =
+                            allPosts.first.data() as Map<String, dynamic>;
+
+                        return ListView.separated(
+                          padding: const EdgeInsets.only(
+                              bottom: 154), // Padding for gradient height
+                          itemCount: allPosts.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 1),
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 20,
+                                  bottom: 25,
+                                ),
+                                child: TeamHomeTopItem(
+                                  title: firstGroup['GroupName']
+                                      .toString()
+                                      .toUpperCase(),
+                                  lastPost: firstGroup['LastMessage'],
+                                  lastPostAuthor:
+                                      firstGroup['LastMessageAuthor'],
+                                  lastPostTime:
+                                      firstGroup['LastMessageTimeStamp'],
+                                  onTap: () => goToChatPage(
+                                    firstGroup['GroupName'],
+                                    firstGroup['LastMessage'],
+                                    firstGroup['LastMessageAuthor'],
+                                    firstGroup['LastMessageTimeStamp'],
+                                    firstGroup['TeamLeage'],
+                                    firstGroup['GroupId'],
+                                    widget.userId,
+                                  ),
+                                  league: firstGroup['TeamLeage'],
+                                ),
+                              );
+                            }
+                            return _buildSmallTeamCards(
+                              title: firstGroup['GroupName']
+                                  .toString()
+                                  .toUpperCase(),
+                              lastPost: firstGroup['LastMessage'],
+                              lastPostAuthor: firstGroup['LastMessageAuthor'],
+                              lastPostTime: firstGroup['LastMessageTimeStamp'],
+                              onTap: () => goToChatPage(
+                                firstGroup['GroupName'],
+                                firstGroup['LastMessage'],
+                                firstGroup['LastMessageAuthor'],
+                                firstGroup['LastMessageTimeStamp'],
+                                firstGroup['TeamLeage'],
+                                firstGroup['GroupId'],
+                                widget.userId,
+                              ),
+                              league: firstGroup['TeamLeage'],
+                            );
+                          },
+                        );
+                      } else {
+                        // If no posts are available
+                        return const Center(child: Text("No teams found."));
+                      }
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    );
+                  },
+                ),
+                // Gradient overlay at the bottom
+                // Blurry gradient overlay at the bottom
+                // Blurry gradient overlay at the bottom
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: ClipRect(
+                    // Add this to clip the blur effect
+                    child: SizedBox(
+                      height: 154,
+                      width: double.infinity,
                       child: Container(
-                        height: 50, // control the aera covered
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
+                              Theme.of(context).colorScheme.surface,
                               Theme.of(context)
                                   .colorScheme
                                   .surface
-                                  .withOpacity(0.9),
-                              Theme.of(context)
-                                  .colorScheme
-                                  .surface
-                                  .withOpacity(0.0)
+                                  .withOpacity(0),
                             ],
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                )
+              ],
             ),
-            const SizedBox(height: 20),
-            _buildJoinSection(),
-            const SizedBox(height: 20),
-            _buildCreateTeamButton(),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+          ),
+          const SizedBox(height: 20),
+          _buildJoinSection(),
+          const SizedBox(height: 20),
+          _buildCreateTeamButton(),
+          const SizedBox(height: 20),
+        ],
+      )),
     );
   }
 
@@ -340,17 +474,32 @@ class _ChatHomePageState extends State<ChatHomePage>
     );
   }
 
-  Widget _buildSmallTeamCards() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildSmallTeamCard('FRENCH'),
-        _buildSmallTeamCard('GEEKOS'),
-      ],
+  Widget _buildSmallTeamCards({
+    required String title,
+    required String lastPost,
+    required String lastPostAuthor,
+    required Timestamp lastPostTime,
+    required void Function() onTap,
+    required String league,
+  }) {
+    return _buildSmallTeamCard(
+      title,
+      lastPost,
+      lastPostAuthor,
+      lastPostTime,
+      onTap,
+      league,
     );
   }
 
-  Widget _buildSmallTeamCard(String title) {
+  Widget _buildSmallTeamCard(
+    String title,
+    String lastPost,
+    String lastPostAuthor,
+    Timestamp lastPostTime,
+    void Function() onTap,
+    String league,
+  ) {
     return Container(
       width: 167,
       height: 175,
@@ -367,13 +516,13 @@ class _ChatHomePageState extends State<ChatHomePage>
             style: TextStyle(color: Colors.grey[600], fontSize: 25),
           ),
           const Spacer(),
-          const Text(
-            'Oui oui baguette',
-            style: TextStyle(color: Color(0xFFCACACA), fontSize: 12),
+          Text(
+            lastPost,
+            style: const TextStyle(color: Color(0xFFCACACA), fontSize: 12),
           ),
-          const Text(
-            "Yursen le chef d'équipe\n01/07/2024 20:30",
-            style: TextStyle(color: Color(0xFF959595), fontSize: 10),
+          Text(
+            "$lastPostAuthor\n${formatDate(lastPostTime)}",
+            style: const TextStyle(color: Color(0xFF959595), fontSize: 10),
           ),
         ],
       ),
@@ -386,9 +535,12 @@ class _ChatHomePageState extends State<ChatHomePage>
         _showCreateTeamModal(context);
       },
       style: ElevatedButton.styleFrom(
+        shadowColor: const Color.fromARGB(0, 0, 0, 0),
         minimumSize: const Size(340, 58),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        side: const BorderSide(color: Colors.black),
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        side: BorderSide(
+            color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2)),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -401,48 +553,59 @@ class _ChatHomePageState extends State<ChatHomePage>
       ),
     );
   }
-}
 
-Widget _buildJoinSection() {
-  return Column(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(6, (index) => _buildNumberBox(index + 1)),
-      ),
-      const SizedBox(height: 20),
-      ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(340, 41),
-          backgroundColor: Colors.grey,
-          //side: const BorderSide(color: Colors.white),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+  Widget _buildJoinSection() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(6, (index) => _buildNumberBox(index + 1)),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(340, 41),
+            shadowColor: const Color.fromARGB(0, 0, 0, 0),
+            foregroundColor: Colors.green,
+            backgroundColor: const Color.fromARGB(255, 110, 252, 114),
+            //side: const BorderSide(color: Colors.white),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Text(
+            'J O I N',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
           ),
         ),
-        child: const Text(
-          'J O I N',
-          style: TextStyle(color: Colors.white),
+      ],
+    );
+  }
+
+  Widget _buildNumberBox(int number) {
+    return Container(
+      width: 31,
+      height: 41,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: Colors.green,
+          width: 1, // Border width (adjust as needed)
         ),
       ),
-    ],
-  );
-}
-
-Widget _buildNumberBox(int number) {
-  return Container(
-    width: 31,
-    height: 41,
-    decoration: BoxDecoration(
-      color: Colors.grey[700],
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Center(
-      child: Text(
-        '$number',
-        style: const TextStyle(color: Colors.white, fontSize: 15),
+      child: Center(
+        child: Text(
+          '$number',
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.tertiary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

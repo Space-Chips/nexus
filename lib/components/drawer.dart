@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -47,7 +46,6 @@ class _MyDrawerState extends State<MyDrawer> {
   void initState() {
     super.initState();
     _loadDrawerItemOrder();
-    print(widget.isAdmin);
   }
 
   Future<void> _loadDrawerItemOrder() async {
@@ -70,109 +68,18 @@ class _MyDrawerState extends State<MyDrawer> {
         }
       }
     } catch (error) {
-      print("Error loading drawer order: $error");
+      //
     }
   }
 
   Future<void> _saveDrawerItemOrder() async {
-    try {
-      var userCollection = FirebaseFirestore.instance.collection('users');
-      var querySnapshot = await userCollection
-          .where('email', isEqualTo: currentUser.email)
-          .get();
+    var userCollection = FirebaseFirestore.instance.collection('users');
+    var querySnapshot =
+        await userCollection.where('email', isEqualTo: currentUser.email).get();
 
-      if (querySnapshot.size > 0) {
-        var userDocument = querySnapshot.docs[0];
-        await userDocument.reference
-            .update({'drawerItemOrder': drawerItemOrder});
-      }
-    } catch (error) {
-      print("Error saving drawer order: $error");
-    }
-  }
-
-  Widget _buildDrawerItem(String itemKey) {
-    switch (itemKey) {
-      case 'HOME':
-        return MyListTile(
-          key: ValueKey(itemKey),
-          icon: Icons.home_rounded,
-          text: 'H O M E',
-          onTap: () => Navigator.pop(context),
-        );
-      case 'SEARCH':
-        return MyListTile(
-          key: ValueKey(itemKey),
-          icon: Icons.search_outlined,
-          text: 'S E A R C H',
-          onTap: widget.onSearchTap,
-        );
-      case 'PROFILE':
-        return MyListTile(
-          key: ValueKey(itemKey),
-          icon: Icons.person_rounded,
-          text: 'P R O F I L E',
-          onTap: widget.onProfileTap,
-        );
-      case 'THEME':
-        return MyListTile(
-          key: ValueKey(itemKey),
-          icon: Icons.bedtime_rounded,
-          text: 'T H E M E',
-          onTap: widget.onThemeTap,
-        );
-      case 'LIVE CHAT':
-        return MyListTile(
-          key: ValueKey(itemKey),
-          icon: Icons.chat,
-          text: 'L I V E  C H A T',
-          onTap: widget.onLiveChatTap,
-        );
-      case 'ADMIN CHAT':
-        return widget.isAdmin
-            ? MyListTile(
-                key: ValueKey(itemKey),
-                icon: Icons.shield_rounded,
-                text: 'A D M I N  C H A T',
-                onTap: widget.onAdminChatTap,
-              )
-            : const SizedBox.shrink();
-      case 'TEAMS':
-        return Padding(
-          key: ValueKey(itemKey),
-          padding: const EdgeInsets.only(left: 10.0),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              dividerColor: Colors.white,
-              listTileTheme: ListTileThemeData(
-                iconColor: Colors.white,
-              ),
-            ),
-            child: ExpansionTile(
-              iconColor: Colors.white,
-              collapsedIconColor: Colors.white,
-              leading: const Icon(Icons.group, color: Colors.white),
-              title: const Text('T E A M S',
-                  style: TextStyle(color: Colors.white)),
-              children: <Widget>[
-                ListTile(
-                  title: const Text('M Y  T E A M S',
-                      style: TextStyle(color: Colors.white)),
-                  onTap: widget.onGroupChatTap,
-                ),
-                ListTile(
-                  title: const Text('E X P L O R E  T E A M S',
-                      style: TextStyle(color: Colors.white)),
-                  onTap: () {
-                    // Handle tap
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      default:
-        return const SizedBox.shrink();
+    if (querySnapshot.size > 0) {
+      var userDocument = querySnapshot.docs[0];
+      await userDocument.reference.update({'drawerItemOrder': drawerItemOrder});
     }
   }
 
